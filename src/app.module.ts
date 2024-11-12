@@ -14,6 +14,8 @@ import { CustomerEntity } from './entities/customer.entity';
 import { InvoiceEntity } from './entities/invoice.entity';
 import { UseModule } from './modules/users/user.module';
 import { HotelEntity } from './entities/hotel.entity';
+import { RoleModule } from './modules/roles/role.module';
+import { HotelModule } from './modules/hotels/hotel.module';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { HotelEntity } from './entities/hotel.entity';
       synchronize: true,
     }),
     UseModule,
+    RoleModule,
+    HotelModule,
   ],
   controllers: [AppController],
   providers: [AppService],
