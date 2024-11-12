@@ -16,6 +16,8 @@ import { UseModule } from './modules/users/user.module';
 import { HotelEntity } from './entities/hotel.entity';
 import { roomTypeModule } from './modules/room-type/roomType.module';
 import { roomModule } from './modules/room/room.module';
+import { RoleModule } from './modules/roles/role.module';
+import { HotelModule } from './modules/hotels/hotel.module';
 
 @Module({
   imports: [
@@ -45,6 +47,8 @@ import { roomModule } from './modules/room/room.module';
     UseModule,
     roomTypeModule,
     roomModule,
+    RoleModule,
+    HotelModule,
   ],
   controllers: [AppController],
   providers: [AppService],
