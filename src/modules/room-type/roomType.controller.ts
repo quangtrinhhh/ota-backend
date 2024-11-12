@@ -4,7 +4,7 @@ import { RoomTypeService } from "./roomType.service";
 import { CreateRoomTypeDto } from "./dto/createroomtype.dto";
 import { ResponData } from "src/global/globalClass";
 import { HttpMessage, HttpStatus } from "src/global/globalEnum";
-import { updateRoomTypeDto } from "./dto/updateRoomType.dto";
+import { UpdateRoomTypeDto } from "./dto/updateRoomType.dto";
 
 @Controller('room-type')
 export class RoomTypeController {
@@ -46,7 +46,7 @@ export class RoomTypeController {
   @Put(':id')
   async updateRoomType(
     @Param('id') id: string,
-    @Body() updateRoomTypeDto: updateRoomTypeDto,
+    @Body() updateRoomTypeDto: UpdateRoomTypeDto,
   ) {
     try {
       const updateRoomType = await this.roomTypeService.updateRoomType(Number(id), updateRoomTypeDto);
