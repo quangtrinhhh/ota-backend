@@ -8,7 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { RoomService } from './room.service';
-import { createRoomDto } from './dto/createRoom.dto';
+import { CreateRoomDto } from './dto/createRoom.dto';
 import { RoomEntity } from 'src/entities/room.entity';
 import { ResponData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
@@ -18,7 +18,7 @@ export class roomController {
   constructor(private readonly roomService: RoomService) {}
   @Post()
   async create(
-    @Body() createRoomDto: createRoomDto,
+    @Body() createRoomDto: CreateRoomDto,
   ): Promise<ResponData<RoomEntity>> {
     try {
       const room = await this.roomService.createRoom(createRoomDto);
@@ -31,10 +31,10 @@ export class roomController {
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body() createRoomDto: createRoomDto,
+    @Body() CreateRoomDto: CreateRoomDto,
   ): Promise<ResponData<RoomEntity>> {
     try {
-      const room = await this.roomService.updateRoom(id, createRoomDto);
+      const room = await this.roomService.updateRoom(id, CreateRoomDto);
       return new ResponData(room, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
     } catch (error) {
       return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);

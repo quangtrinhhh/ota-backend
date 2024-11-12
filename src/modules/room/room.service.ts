@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoomEntity } from 'src/entities/room.entity';
 import { Repository } from 'typeorm';
-import { createRoomDto } from './dto/createRoom.dto';
+import { CreateRoomDto } from './dto/createRoom.dto';
 import { RoomTypeEntity } from 'src/entities/roomType.entity';
 import { HotelEntity } from 'src/entities/hotel.entity';
 import { HttpException } from '@nestjs/common';
@@ -18,10 +18,10 @@ export class RoomService {
     private readonly hotelRepository: Repository<HotelEntity>,
   ) {}
   //tạo phòng
-  async createRoom(createRoomDto: createRoomDto): Promise<RoomEntity> {
+  async createRoom(CreateRoomDto: CreateRoomDto): Promise<RoomEntity> {
     // Sử dụng cú pháp đúng để tìm phòng theo room_type_id
     const roomType = await this.roomTypeRepository.findOne({
-      where: { id: createRoomDto.room_type_id },
+      where: { id: CreateRoomDto.room_type_id },
     });
 
     if (!roomType) {
@@ -30,7 +30,7 @@ export class RoomService {
 
     // Kiểm tra xem hotel_id có hợp lệ không
     const hotel = await this.hotelRepository.findOne({
-      where: { id: createRoomDto.hotel_id },
+      where: { id: CreateRoomDto.hotel_id },
     });
 
     if (!hotel) {
@@ -38,13 +38,13 @@ export class RoomService {
     }
 
     // Tạo đối tượng phòng từ DTO
-    const room = this.roomRepository.create(createRoomDto);
+    const room = this.roomRepository.create(CreateRoomDto);
 
     // Lưu phòng vào cơ sở dữ liệu
     return await this.roomRepository.save(room);
   }
   //   update
-  async updateRoom(id: number, updateRoomDto: createRoomDto): Promise<any> {
+  async updateRoom(id: number, updateRoomDto: CreateRoomDto): Promise<any> {
     // Tìm phòng theo ID
     const room = await this.roomRepository.findOne({ where: { id } });
     if (!room) {
