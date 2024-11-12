@@ -14,8 +14,8 @@ import { CustomerEntity } from './entities/customer.entity';
 import { InvoiceEntity } from './entities/invoice.entity';
 import { UseModule } from './modules/users/user.module';
 import { HotelEntity } from './entities/hotel.entity';
-import { roomTypeModule } from './modules/room-type/roomType.module';
-import { roomModule } from './modules/room/room.module';
+import { RoomTypeModule } from './modules/room-type/roomType.module';
+import { RoomModule } from './modules/room/room.module';
 import { RoleModule } from './modules/roles/role.module';
 import { HotelModule } from './modules/hotels/hotel.module';
 
@@ -45,8 +45,8 @@ import { HotelModule } from './modules/hotels/hotel.module';
       synchronize: true,
     }),
     UseModule,
-    roomTypeModule,
-    roomModule,
+    RoomTypeModule,
+    RoomModule,
     RoleModule,
     HotelModule,
   ],
