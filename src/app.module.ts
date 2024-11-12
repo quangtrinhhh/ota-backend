@@ -13,6 +13,7 @@ import { BookingEntity } from './entities/booking.entity';
 import { CustomerEntity } from './entities/customer.entity';
 import { InvoiceEntity } from './entities/invoice.entity';
 import { UseModule } from './modules/users/user.module';
+import { HotelEntity } from './entities/hotel.entity';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UseModule } from './modules/users/user.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [
+        HotelEntity,
         RoleEntity,
         UserEntity,
         RoomTypeEntity,

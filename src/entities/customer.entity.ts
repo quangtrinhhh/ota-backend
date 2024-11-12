@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { HotelEntity } from "./hotel.entity";
 
 @Entity('customer')
 export class CustomerEntity extends BaseEntity {
@@ -22,4 +23,11 @@ export class CustomerEntity extends BaseEntity {
         default: 'Male', // Giới tính mặc định là Male
     })
     gender: 'Male' | 'Female' | 'Other';
+
+    @ManyToOne(() => HotelEntity, hotel => hotel.id)
+    @JoinColumn({ name: 'hotel_id' })
+    hotel: number;
+
+    @Column()
+    hotel_id: number;
 }

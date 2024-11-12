@@ -1,5 +1,6 @@
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { RoleEntity } from "./role.entity";
+import { HotelEntity } from "./hotel.entity";
 
 @Entity('user')
 export class UserEntity extends BaseEntity {
@@ -32,4 +33,10 @@ export class UserEntity extends BaseEntity {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP' })
     updated_at: Date;
 
+    @ManyToOne(() => HotelEntity, hotel => hotel.id)
+    @JoinColumn({ name: 'hotel_id' })
+    hotel: number;
+
+    @Column()
+    hotel_id: number;
 }

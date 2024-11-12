@@ -1,5 +1,6 @@
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { RoomTypeEntity } from "./roomType.entity";
+import { HotelEntity } from "./hotel.entity";
 
 @Entity('room')
 export class RoomEntity extends BaseEntity {
@@ -24,4 +25,11 @@ export class RoomEntity extends BaseEntity {
 
     @Column()
     room_type_id: number;
+
+    @ManyToOne(() => HotelEntity, hotel => hotel.id)
+    @JoinColumn({ name: 'hotel_id' })
+    hotel: number;
+
+    @Column()
+    hotel_id: number;
 }

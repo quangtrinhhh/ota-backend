@@ -1,5 +1,6 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { CustomerEntity } from "./customer.entity";
+import { HotelEntity } from "./hotel.entity";
 
 @Entity('booking')
 export class BookingEntity extends BaseEntity {
@@ -37,4 +38,11 @@ export class BookingEntity extends BaseEntity {
 
     @Column()
     customer_id: number;
+
+    @ManyToOne(() => HotelEntity, hotel => hotel.id)
+    @JoinColumn({ name: 'hotel_id' })
+    hotel: number;
+
+    @Column()
+    hotel_id: number;
 }
