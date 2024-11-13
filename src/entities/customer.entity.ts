@@ -8,8 +8,8 @@ export class CustomerEntity extends BaseEntity {
 
     name: string;
 
-    @Column({ type: 'date' })
-    birthday: string;
+    @Column({ type: 'timestamp' })
+    birthday: Date;
 
     @Column()
     phone: string;
