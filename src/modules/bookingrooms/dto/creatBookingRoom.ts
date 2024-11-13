@@ -1,16 +1,19 @@
-// dtos/create-booking-room.dto.ts
-import { IsInt, IsNumber } from 'class-validator';
+import { IsInt, IsNotEmpty, IsPositive } from 'class-validator';
 
 export class CreateBookingRoomDto {
-    @IsNumber()
+    @IsInt()
+    @IsPositive()
     price: number;
 
     @IsInt()
-    bookingId: number;
+    @IsPositive()
+    booking_id: number;
 
     @IsInt()
-    roomId: number;
+    @IsPositive()
+    room_id: number;
 
     @IsInt()
-    hotelId: number;
+    @IsPositive()
+    hotel_id: number;
 }
