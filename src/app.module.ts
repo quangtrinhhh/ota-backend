@@ -13,7 +13,10 @@ import { BookingEntity } from './entities/booking.entity';
 import { CustomerEntity } from './entities/customer.entity';
 import { InvoiceEntity } from './entities/invoice.entity';
 import { UseModule } from './modules/users/user.module';
+import { BookingModule } from './modules/bookings/booking.module';
+import { BookingRoomModule } from './modules/bookingrooms/bookingroom.module';
 import { HotelEntity } from './entities/hotel.entity';
+
 
 @Module({
   imports: [
@@ -40,7 +43,7 @@ import { HotelEntity } from './entities/hotel.entity';
       ],
       synchronize: true,
     }),
-    UseModule,
+    UseModule, BookingModule, BookingRoomModule,
   ],
   controllers: [AppController],
   providers: [AppService],
