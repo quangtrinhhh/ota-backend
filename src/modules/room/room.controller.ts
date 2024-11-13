@@ -6,19 +6,21 @@ import {
   Param,
   Post,
   Put,
+  ValidationPipe,
 } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/createRoom.dto';
 import { RoomEntity } from 'src/entities/room.entity';
 import { ResponData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
+import { UpdateRoomDto } from './dto/updateRoom.dto';
 
 @Controller('room')
 export class roomController {
   constructor(private readonly roomService: RoomService) {}
   @Post()
   async create(
-    @Body() createRoomDto: CreateRoomDto,
+    @Body(new ValidationPipe()) createRoomDto: CreateRoomDto,
   ): Promise<ResponData<RoomEntity>> {
     try {
       const room = await this.roomService.createRoom(createRoomDto);
@@ -31,10 +33,10 @@ export class roomController {
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body() CreateRoomDto: CreateRoomDto,
+    @Body(new ValidationPipe()) UpdateRoomDto: UpdateRoomDto,
   ): Promise<ResponData<RoomEntity>> {
     try {
-      const room = await this.roomService.updateRoom(id, CreateRoomDto);
+      const room = await this.roomService.updateRoom(id, UpdateRoomDto);
       return new ResponData(room, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
     } catch (error) {
       return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
