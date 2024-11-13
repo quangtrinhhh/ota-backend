@@ -1,30 +1,39 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  Min,
+  IsOptional,
+  IsNumberString,
+} from 'class-validator';
 
 export class CreateRoomDto {
   @IsNotEmpty({ message: 'Tên phòng không được bỏ trống' })
   name: string;
 
   @IsOptional()
-  @IsEnum(['clean', 'dirty'], {
-    message: 'Trạng thái dọn dẹp phải là clean hoặc dirty',
-  })
-  clean_status?: boolean;
+  @IsBoolean({ message: 'clean_status phải là kiểu boolean' })
+  clean_status?: boolean = true; // Mặc định là true
 
   @IsOptional()
-  @IsEnum(['available', 'booked'], {
-    message: 'Trạng thái phải là available hoặc booked',
-  })
-  status?: string;
+  status?: string = 'available'; // Mặc định là "sạch"
 
-  @IsNotEmpty({ message: 'Giá phòng là bắt buộc' })
-  @IsNumber()
+  @IsNotEmpty({ message: 'Giá không được bỏ trống' })
+  @Type(() => Number) // Chuyển đổi từ chuỗi thành số
+  @IsInt({ message: 'Giá phải là số nguyên' })
+  @Min(0, { message: 'Giá phải lớn hơn hoặc bằng 0' })
   price: number;
 
-  @IsNotEmpty({ message: 'Room Type ID là bắt buộc' })
-  @IsNumber()
+  @IsNotEmpty({ message: 'room_type_id không được bỏ trống' })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt({ message: 'room_type_id phải là số nguyên' })
   room_type_id: number;
 
-  @IsNotEmpty({ message: 'Hotel ID là bắt buộc' })
-  @IsNumber()
+  @IsNotEmpty({ message: 'hotel_id không được bỏ trống' })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt({ message: 'hotel_id phải là số nguyên' })
   hotel_id: number;
 }

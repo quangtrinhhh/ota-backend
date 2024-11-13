@@ -6,6 +6,7 @@ import { RoomTypeEntity } from 'src/entities/roomType.entity';
 import { HotelEntity } from 'src/entities/hotel.entity';
 import { HttpException } from '@nestjs/common';
 import { HttpStatus } from 'src/global/globalEnum';
+import { UpdateRoomDto } from './dto/updateRoom.dto';
 
 export class RoomService {
   constructor(
@@ -44,7 +45,7 @@ export class RoomService {
     return await this.roomRepository.save(room);
   }
   //   update
-  async updateRoom(id: number, updateRoomDto: CreateRoomDto): Promise<any> {
+  async updateRoom(id: number, updateRoomDto: UpdateRoomDto): Promise<any> {
     // Tìm phòng theo ID
     const room = await this.roomRepository.findOne({ where: { id } });
     if (!room) {

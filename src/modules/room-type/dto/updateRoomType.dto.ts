@@ -1,12 +1,17 @@
-import { IsNotEmpty, IsOptional, ValidateIf } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsInt, IsOptional, MinLength } from 'class-validator';
 
 export class UpdateRoomTypeDto {
   @IsOptional()
-  @IsNotEmpty({ message: 'name không được để trống' })
+  @MinLength(1, { message: 'Name phải nhập ít nhất 1 ký tự.' })
   name?: string;
 
   @IsOptional()
+  @MinLength(1, { message: 'nost phải nhập ít nhất 1 ký tự.' })
   notes?: string;
-  @IsNotEmpty({ message: 'hotel_id không tồn tại' })
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt({ message: 'hotel_id phải là số nguyên' })
   hotel_id?: number;
 }
