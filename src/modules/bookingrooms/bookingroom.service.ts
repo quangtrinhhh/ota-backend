@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm'; // Ensure this import is correct
+import { Repository } from 'typeorm'; // Ensure this import is correct
 import { BookingRoomEntity } from 'src/entities/bookingRoom.entity'; // Chỉnh sửa đường dẫn nếu cần
 import { CreateBookingRoomDto } from './dto/creatBookingRoom';
 import { UpdateBookingRoomDto } from './dto/updateBookingRoom';
@@ -10,66 +9,33 @@ import { UpdateBookingRoomDto } from './dto/updateBookingRoom';
 export class BookingRoomService {
     constructor(
         @InjectRepository(BookingRoomEntity)
-        private readonly bookingRoomRepository: Repository<BookingRoomEntity>,
+        private readonly bookingRoomRepository: Repository<BookingRoomEntity> // Now the Repository type is correctly recognized
     ) {}
 
-    // Phương thức tạo mới BookingRoom
-    async createBookingRoom(data: CreateBookingRoomDto): Promise<BookingRoomEntity> {
-        const bookingRoom = this.bookingRoomRepository.create({
-            price: data.price,
-            booking_id: data.bookingId,
-            room_id: data.roomId,
-            hotel_id: data.hotelId,
-        });
-        return await this.bookingRoomRepository.save(bookingRoom);
+    // Create a new booking room
+    async create(createBookingRoomDto: CreateBookingRoomDto): Promise<BookingRoomEntity> {
+        const bookingRoom = this.bookingRoomRepository.create(createBookingRoomDto); // Create entity instance
+        return await bookingRoom.save(); // Save entity to database
     }
 
-    // Phương thức cập nhật BookingRoom
-    async updateBookingRoom(id: number, data: UpdateBookingRoomDto): Promise<BookingRoomEntity> {
-        let bookingRoom: BookingRoomEntity;
-
-        try {
-            // Sử dụng findOne với FindOneOptions
-            bookingRoom = await this.bookingRoomRepository.findOne({ where: { id } });
-        } catch (error) {
-            throw new NotFoundException(`BookingRoom with ID ${id} not found`);
-        }
-
-        // Cập nhật các trường nếu có thay đổi
-        bookingRoom.price = data.price ?? bookingRoom.price;
-        bookingRoom.booking_id = data.bookingId ?? bookingRoom.booking_id;
-        bookingRoom.room_id = data.roomId ?? bookingRoom.room_id;
-        bookingRoom.hotel_id = data.hotelId ?? bookingRoom.hotel_id;
-
-        return await this.bookingRoomRepository.save(bookingRoom);
+    // Get all booking rooms
+    async getAll(): Promise<BookingRoomEntity[]> {
+        return await this.bookingRoomRepository.find();
     }
 
-    // Phương thức tìm BookingRoom theo ID
-    async findBookingRoomById(id: number): Promise<BookingRoomEntity> {
-        try {
-            // Sử dụng findOne với FindOneOptions
-            return await this.bookingRoomRepository.findOne({ where: { id } });
-        } catch (error) {
-            throw new NotFoundException(`BookingRoom with ID ${id} not found`);
-        }
+    // Get booking room by ID
+    async getById(id: number): Promise<BookingRoomEntity> {
+        return await this.bookingRoomRepository.findOne({ where: { id } });
     }
 
-    // Phương thức lấy tất cả BookingRooms
-    async findAllBookingRooms(): Promise<BookingRoomEntity[]> {
-        return this.bookingRoomRepository.find();
+    // Update booking room by ID
+    async update(id: number, updateBookingRoomDto: UpdateBookingRoomDto): Promise<BookingRoomEntity> {
+        await this.bookingRoomRepository.update(id, updateBookingRoomDto); // Update entity in DB
+        return await this.bookingRoomRepository.findOne({ where: { id } }); // Return updated entity
     }
 
-    // Phương thức xóa BookingRoom
-    async deleteBookingRoom(id: number): Promise<void> {
-        let bookingRoom: BookingRoomEntity;
-
-        try {
-            // Sử dụng findOne với FindOneOptions
-            bookingRoom = await this.bookingRoomRepository.findOne({ where: { id } });
-        } catch (error) {
-            throw new NotFoundException(`BookingRoom with ID ${id} not found`);
-        }
-
-        await this.bookingRoomRepository.remove(bookingRoom);
+    // Delete booking room by ID
+    async delete(id: number): Promise<void> {
+        await this.bookingRoomRepository.delete(id); // Delete entity from DB
     }
 }
