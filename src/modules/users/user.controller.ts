@@ -38,6 +38,9 @@ export class UserController {
             const user = await this.userService.createUser(createUserDto);
             return new ResponData<User>(user, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
+            if (error.message) {
+                return new ResponData<User>(null, HttpStatus.ERROR, error.message);
+            }
             return new ResponData<User>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
@@ -47,6 +50,9 @@ export class UserController {
         try {
             return new ResponData<string>(await this.userService.updateUser(updateUserDto), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
+            if (error.message) {
+                return new ResponData<string>(null, HttpStatus.ERROR, error.message);
+            }
             return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
