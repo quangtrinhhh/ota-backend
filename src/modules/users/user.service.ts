@@ -45,16 +45,16 @@ export class UserService {
         user.hotel_id = createUserDto.hotel_id;
         user.role_id = createUserDto.role_id;
 
+        if (user.user_name && await this.isEmailExist(user.user_name, user.hotel_id)) {
+            throw new Error('Tên tài khoản đã được đăng kí trong khách sạn');
+        }
+
         if (user.email && await this.isEmailExist(user.email, user.hotel_id)) {
             throw new Error('Email đã được đăng kí trong khách sạn');
         }
         if (user.phone && await this.isPhoneExist(user.phone, user.hotel_id)) {
             throw new Error('Số điện thoại đã được đăng kí trong khách sạn');
         }
-        if (user.user_name && await this.isUserNameExist(user.user_name, user.hotel_id)) {
-            throw new Error('Tên người dùng đã được đăng kí trong khách sạn');
-        }
-
 
         await this.userRepository.save(user);
         return new User(user.id, user.user_name, user.password, user.email, user.phone, user.hotel_id, user.role_id);
@@ -65,17 +65,23 @@ export class UserService {
         return new User(user.id, user.user_name, user.password, user.email, user.phone, user.hotel_id, user.role_id);
     }
 
+    async finByEmail(email: string) {
+        return await this.userRepository.findOne({ where: { email } });
+    }
+
     async updateUser(updateUserDto: UpdateUserDto): Promise<string> {
         const { id, hotel_id, ...updateData } = updateUserDto;
 
         if (updateData.email && await this.isEmailExist(updateData.email, hotel_id)) {
             throw new Error('Email đã được đăng kí trong khách sạn');
         }
-        if (updateData.phone && await this.isPhoneExist(updateData.phone, hotel_id)) {
+
+        if (updateData.phone && await this.isEmailExist(updateData.phone, hotel_id)) {
             throw new Error('Số điện thoại đã được đăng kí trong khách sạn');
         }
-        if (updateData.user_name && await this.isUserNameExist(updateData.user_name, hotel_id)) {
-            throw new Error('Tên người dùng đã được đăng kí trong khách sạn');
+
+        if (updateData.user_name && await this.isEmailExist(updateData.user_name, hotel_id)) {
+            throw new Error('Tên tài khoản đã được đăng kí trong khách sạn');
         }
 
         if (updateData.password) {

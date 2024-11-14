@@ -47,17 +47,17 @@ export class HotelService {
     async createHotel(createHotelDto: CreateHotelDto): Promise<Hotel> {
         const hotel = new Hotel();
         hotel.name = createHotelDto.name;
-        hotel.address = createHotelDto.address;
-        hotel.phone = createHotelDto.phone;
         hotel.email = createHotelDto.email;
+        if (createHotelDto.address) hotel.address = createHotelDto.address;
+        if (createHotelDto.phone) hotel.phone = createHotelDto.phone;
 
         if (await this.isNameExist(hotel.name)) {
             throw new Error('Tên khách sạn đã được sử dụng!');
         }
-        if (await this.isAddressExist(hotel.address)) {
+        if (hotel.address && await this.isAddressExist(hotel.address)) {
             throw new Error('Địa chỉ khách sạn đã được sử dụng!');
         }
-        if (await this.isPhoneExist(hotel.phone)) {
+        if (hotel.phone && await this.isPhoneExist(hotel.phone)) {
             throw new Error('Số điện thoại khách sạn đã được sử dụng!');
         }
         if (await this.isEmailExist(hotel.email)) {
