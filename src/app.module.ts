@@ -20,6 +20,8 @@ import { RoomTypeModule } from './modules/room-type/roomType.module';
 import { RoomModule } from './modules/room/room.module';
 import { RoleModule } from './modules/roles/role.module';
 import { HotelModule } from './modules/hotels/hotel.module';
+import { CustomerModule } from './modules/customers/customer.module';
+import { InvoiceModule } from './modules/invoice/invoice.module';
 
 
 @Module({
@@ -54,6 +56,8 @@ import { HotelModule } from './modules/hotels/hotel.module';
     RoomModule,
     BookingModule,
     BookingRoomModule,
+    CustomerModule,
+    InvoiceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
