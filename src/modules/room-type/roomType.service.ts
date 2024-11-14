@@ -13,7 +13,9 @@ export class RoomTypeService {
   ) {}
 
   //Tạo mới
-  async create(createRoomTypeDto: CreateRoomTypeDto): Promise<RoomTypeEntity> {
+  async create(
+    createRoomTypeDto: CreateRoomTypeDto,
+  ): Promise<CreateRoomTypeDto> {
     const { name, notes, hotel_id } = createRoomTypeDto;
     const roomType = this.roomTypeRepository.create({
       name,
@@ -23,7 +25,7 @@ export class RoomTypeService {
     return this.roomTypeRepository.save(roomType);
   }
   // lấy tất cả
-  async findAllService(): Promise<RoomTypeEntity[]> {
+  async findAllService(): Promise<any> {
     return await this.roomTypeRepository.find();
   }
   //Xóa
