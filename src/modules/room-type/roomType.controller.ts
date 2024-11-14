@@ -15,6 +15,7 @@ import { CreateRoomTypeDto } from './dto/createroomtype.dto';
 import { ResponData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { UpdateRoomTypeDto } from './dto/updateRoomType.dto';
+import { promises } from 'dns';
 
 @Controller('room-type')
 export class RoomTypeController {
@@ -24,7 +25,7 @@ export class RoomTypeController {
   @Post()
   async create(
     @Body(new ValidationPipe()) createRoomTypeDto: CreateRoomTypeDto,
-  ) {
+  ): Promise<ResponData<CreateRoomTypeDto>> {
     try {
       // Đảm bảo sử dụng await để lấy kết quả từ service
       const createRoomType =

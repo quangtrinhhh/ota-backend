@@ -19,7 +19,7 @@ export class RoomService {
     private readonly hotelRepository: Repository<HotelEntity>,
   ) {}
   //tạo phòng
-  async createRoom(CreateRoomDto: CreateRoomDto): Promise<RoomEntity> {
+  async createRoom(CreateRoomDto: CreateRoomDto): Promise<CreateRoomDto> {
     // Sử dụng cú pháp đúng để tìm phòng theo room_type_id
     const roomType = await this.roomTypeRepository.findOne({
       where: { id: CreateRoomDto.room_type_id },
@@ -82,7 +82,7 @@ export class RoomService {
     return room;
   }
   //   lấy tất cả
-  async getAllRooms(): Promise<RoomEntity[]> {
+  async getAllRooms(): Promise<any> {
     return await this.roomRepository.find(); // Lấy tất cả phòng
   }
 }
