@@ -1,9 +1,10 @@
-import { IsEmail, IsNotEmpty, IsEnum, IsDateString, IsInt } from "class-validator";
+import { IsEmail, IsNotEmpty, IsEnum, IsDateString, IsInt, IsOptional, MaxLength, MinLength } from "class-validator";
 
 export class CreateCustomerDto {
-    @IsDateString()
-    birthday: Date;
 
+    @IsOptional()
+    @MinLength(10, { message: 'Số điện thoại chứa ít nhất 10 ký tự' })
+    @MaxLength(15, { message: 'Số điện thoại chứa nhiều nhất 15 ký tự' })
     phone: string;
 
     @IsNotEmpty({ message: 'email không được để trống' })
@@ -13,6 +14,6 @@ export class CreateCustomerDto {
     @IsEnum(['Male' , 'Female' , 'Other'])
     gender: 'Male' | 'Female' | 'Other';
 
-    @IsInt()
+    @IsNotEmpty()
     hotel_id: number;
 }
