@@ -4,7 +4,9 @@ import { IsInt, IsNotEmpty, IsOptional } from 'class-validator';
 export class CreateRoomTypeDto {
   @IsNotEmpty({ message: 'name room type không được để trống' })
   name: string;
-  notes?: string;
+
+  @IsOptional()
+  notes: string;
   @IsNotEmpty({ message: 'hotel_id không được bỏ trống' })
   @Type(() => Number)
   @IsOptional()

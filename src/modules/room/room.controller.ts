@@ -21,7 +21,7 @@ export class roomController {
   @Post()
   async create(
     @Body(new ValidationPipe()) createRoomDto: CreateRoomDto,
-  ): Promise<ResponData<RoomEntity>> {
+  ): Promise<ResponData<CreateRoomDto>> {
     try {
       const room = await this.roomService.createRoom(createRoomDto);
       return new ResponData(room, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
@@ -34,7 +34,7 @@ export class roomController {
   async update(
     @Param('id') id: number,
     @Body(new ValidationPipe()) UpdateRoomDto: UpdateRoomDto,
-  ): Promise<ResponData<RoomEntity>> {
+  ): Promise<ResponData<string>> {
     try {
       const room = await this.roomService.updateRoom(id, UpdateRoomDto);
       return new ResponData(room, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
@@ -54,7 +54,7 @@ export class roomController {
   }
   // Lấy phòng theo ID
   @Get(':id')
-  async getOne(@Param('id') id: number): Promise<ResponData<RoomEntity>> {
+  async getOne(@Param('id') id: number): Promise<ResponData<string>> {
     try {
       const room = await this.roomService.getRoom(id);
       return new ResponData(room, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
@@ -64,7 +64,7 @@ export class roomController {
   }
   //    lấy tất cả
   @Get()
-  async getAll(): Promise<ResponData<RoomEntity>> {
+  async getAll(): Promise<ResponData<any>> {
     try {
       const rooms = await this.roomService.getAllRooms();
       return new ResponData(rooms, HttpStatus.SUCCESS, HttpMessage.SUCCESS);

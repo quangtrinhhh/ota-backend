@@ -6,10 +6,6 @@ export class UpdateCustomerDto {
     id: number;
 
     @IsOptional()
-    @IsDateString()
-    birthday: string;
-
-    @IsOptional()
     phone?: string;
 
     @IsOptional()

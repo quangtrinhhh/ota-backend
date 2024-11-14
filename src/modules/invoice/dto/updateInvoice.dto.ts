@@ -6,10 +6,6 @@ export class UpdateInvoiceDto {
     id?: number;
 
     @IsOptional()
-    @IsDateString()
-    issue_at?: Date;
-
-    @IsOptional()
     @IsInt()
     total_amount?: number;
 

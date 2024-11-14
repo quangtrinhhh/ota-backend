@@ -8,7 +8,7 @@ import { UpdateCustomerDto } from "./dto/updateCustomer.dto";
 
 @Controller('customers')
 export class CustomerController {
-    constructor(private readonly customerService: CustomerService) { }
+    constructor(private readonly customerService: CustomerService) {}
 
     @Get()
     async getCustomers(): Promise<ResponData<Customer[]>> {
@@ -24,8 +24,6 @@ export class CustomerController {
     async getDetailCustomer(@Param('id') id: number): Promise<ResponData<Customer>> {
         try {
             const customer = await this.customerService.getDetailCustomer(id);
-            console.log(customer);
-
             return new ResponData<Customer>(customer, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
             return new ResponData<Customer>(null, HttpStatus.ERROR, HttpMessage.ERROR);
@@ -42,9 +40,9 @@ export class CustomerController {
         }
     }
 
-    @Put()
+    @Put(':id')
     async updateCustomer(
-        @Param('id') id:number
+        @Param('id') id: number,
         @Body(new ValidationPipe) updateCustomerDto: UpdateCustomerDto
     ): Promise<ResponData<string>> {
         try {
@@ -58,7 +56,8 @@ export class CustomerController {
     @Delete(':id')
     async deleteCustomer(@Param('id') id: number): Promise<ResponData<string>> {
         try {
-            return new ResponData<string>(await this.customerService.deleteCustomer(id), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+            const response = await this.customerService.deleteCustomer(id);
+            return new ResponData<string>(response, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
             return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }

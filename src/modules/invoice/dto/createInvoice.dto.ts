@@ -1,8 +1,6 @@
-import { IsDateString, IsInt, IsEnum } from 'class-validator';
+import { IsInt, IsEnum } from 'class-validator';
 
 export class CreateInvoiceDto {
-    @IsDateString()
-    issue_at: Date;
 
     @IsInt()
     total_amount: number;

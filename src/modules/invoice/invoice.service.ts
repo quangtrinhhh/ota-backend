@@ -40,17 +40,10 @@ export class InvoiceService {
     }
 
     // Cập nhật hóa đơn theo ID
-    async updateInvoice(id: number, updateInvoiceDto: UpdateInvoiceDto): Promise<string> {
-        const invoice = await this.invoiceRepository.preload({
-            id,
-            ...updateInvoiceDto,
-        });
-
-        if (!invoice) {
-            throw new NotFoundException(`Invoice with ID ${id} not found`);
-        }
-
-        await this.invoiceRepository.save(invoice);
+    async updateInvoice(id: number, updateInvoiceDto: UpdateInvoiceDto) {
+        const invoice = await this.getDetailInvoice(id); 
+        Object.assign(invoice, updateInvoiceDto); 
+        await this.invoiceRepository.save(invoice); 
         return 'Update success';
     }
 
