@@ -20,12 +20,13 @@ import { RoomTypeModule } from './modules/room-type/roomType.module';
 import { RoomModule } from './modules/room/room.module';
 import { RoleModule } from './modules/roles/role.module';
 import { HotelModule } from './modules/hotels/hotel.module';
+import { CustomerModule } from './modules/customers/customer.module';
+import { InvoiceModule } from './modules/invoice/invoice.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { CustomerModule } from './modules/customers/customer.module';
-import { InvoiceModule } from './modules/invoice/invoice.module';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -65,13 +66,13 @@ import { InvoiceModule } from './modules/invoice/invoice.module';
           from: '"No Reply" <no-reply@localhost>',
         },
         // preview: true,
-        // template: {
-        //   dir: process.cwd() + '/template/',
-        //   adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()
-        //   options: {
-        //     strict: true,
-        //   },
-        // },
+        template: {
+          dir: process.cwd() + '/src/mail/templates/',
+          adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()
+          options: {
+            strict: true,
+          },
+        },
       })
     }),
     HotelModule,

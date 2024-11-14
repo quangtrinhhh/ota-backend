@@ -32,8 +32,12 @@ export class AuthController {
       .sendMail({
         to: 'thong94.1819@gmail.com', // list of receivers
         subject: 'Testing Nest MailerModule ✔', // Subject line
-        text: 'welcome', // plaintext body
-        html: '<b>Hello world</b>', // HTML body content
+        text: 'welcome OTA', // plaintext body
+        template: "register",
+        context: { // ✏️ filling curly brackets with content
+          name: "Thông",
+          activationCode: 123456,
+        },
       })
     return "ok";
   }
