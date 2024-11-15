@@ -36,7 +36,7 @@ export class InvoiceEntity extends BaseEntity {
 
     @ManyToOne(() => HotelEntity, hotel => hotel.id)
     @JoinColumn({ name: 'hotel_id' })
-    hotel: number;
+    hotel: HotelEntity;
 
     @Column()
     hotel_id: number;

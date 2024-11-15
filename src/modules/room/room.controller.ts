@@ -17,7 +17,7 @@ import { UpdateRoomDto } from './dto/updateRoom.dto';
 
 @Controller('room')
 export class roomController {
-  constructor(private readonly roomService: RoomService) {}
+  constructor(private readonly roomService: RoomService) { }
   @Post()
   async create(
     @Body(new ValidationPipe()) createRoomDto: CreateRoomDto,
@@ -52,6 +52,27 @@ export class roomController {
       return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
+
+  @Get('info-bookings')
+  async getAllRoomsWithBookings(): Promise<ResponData<any>> {
+    try {
+      const rooms = await this.roomService.getAllRoomsWithBookings();
+      return new ResponData(rooms, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+    } catch (error) {
+      return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
+  @Get('info-bookingsToday')
+  async getAllRoomsWithBookingsToday(): Promise<ResponData<any>> {
+    try {
+      const rooms = await this.roomService.getAllRoomsWithBookingsToday();
+      return new ResponData(rooms, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+    } catch (error) {
+      return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
   // Lấy phòng theo ID
   @Get(':id')
   async getOne(@Param('id') id: number): Promise<ResponData<string>> {
@@ -62,7 +83,7 @@ export class roomController {
       return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
-  //    lấy tất cả
+  //  lấy tất cả
   @Get()
   async getAll(): Promise<ResponData<any>> {
     try {
@@ -72,4 +93,5 @@ export class roomController {
       return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
+
 }

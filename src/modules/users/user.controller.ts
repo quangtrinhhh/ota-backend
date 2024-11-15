@@ -5,6 +5,7 @@ import { UserService } from "./user.service";
 import { User } from "src/models/user.model";
 import { CreateUserDto } from "./dto/createUser.dto";
 import { UpdateUserDto } from "./dto/updateUser.dto";
+import { Public } from "src/decorator/customize";
 
 @Controller('users')
 export class UserController {
@@ -31,7 +32,7 @@ export class UserController {
             return new ResponData<User>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
-
+    @Public()
     @Post()
     async createUser(@Body(new ValidationPipe) createUserDto: CreateUserDto): Promise<ResponData<User>> {
         try {

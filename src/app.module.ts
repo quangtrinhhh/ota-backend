@@ -27,6 +27,7 @@ import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { FloorEntity } from './entities/floor.entity';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
         CustomerEntity,
         BookingEntity,
         InvoiceEntity,
+        FloorEntity,
       ],
       synchronize: true,
     }),

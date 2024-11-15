@@ -1,6 +1,8 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { RoomTypeEntity } from "./roomType.entity";
 import { HotelEntity } from "./hotel.entity";
+import { FloorEntity } from "./floor.entity";
+import { BookingRoomEntity } from "./bookingRoom.entity";
 
 @Entity('room')
 export class RoomEntity extends BaseEntity {
@@ -26,10 +28,20 @@ export class RoomEntity extends BaseEntity {
     @Column()
     room_type_id: number;
 
+    @ManyToOne(() => FloorEntity, floor => floor.id)
+    @JoinColumn({ name: 'floor_id' })
+    floor: FloorEntity;
+
+    @Column()
+    floor_id: number;
+
     @ManyToOne(() => HotelEntity, hotel => hotel.id)
     @JoinColumn({ name: 'hotel_id' })
-    hotel: number;
+    hotel: HotelEntity;
 
     @Column()
     hotel_id: number;
+
+    @OneToMany(() => BookingRoomEntity, (bookingRoom) => bookingRoom.room)
+    booking_rooms: BookingRoomEntity[];
 }
