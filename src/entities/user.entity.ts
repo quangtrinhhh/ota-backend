@@ -27,6 +27,12 @@ export class UserEntity extends BaseEntity {
     @Column()
     role_id: number;
 
+    @Column()
+    code: string;
+
+    @Column()
+    isActive: boolean;
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
 

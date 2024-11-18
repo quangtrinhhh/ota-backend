@@ -46,4 +46,9 @@ export class RoleService {
         await this.roleRepository.delete(id);
         return `Delete role ${id} success`;
     }
+
+    async getRoleIdByName(role_name: string): Promise<number> {
+        const role = await this.roleRepository.findOne({ where: { name: role_name } });
+        return role.id;
+    }
 }

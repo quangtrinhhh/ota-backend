@@ -96,4 +96,14 @@ export class HotelService {
         return `Delete hotel ${id} success`;
     }
 
+    async createHotelRegister(name_hotel: string, email: string): Promise<number> {
+        const hotel = new Hotel();
+        hotel.name = name_hotel;
+        hotel.email = email;
+
+        const savedHotel = await this.hotelRepository.save(hotel);
+
+        return savedHotel.id;
+    }
+
 }

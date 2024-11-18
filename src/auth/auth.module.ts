@@ -7,10 +7,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './passport/local.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './passport/jwt.strategy';
+import { HotelModule } from 'src/modules/hotels/hotel.module';
+import { RoleModule } from 'src/modules/roles/role.module';
 
 @Module({
   imports: [
     UserModule,
+    HotelModule,
+    RoleModule,
     ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({

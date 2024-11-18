@@ -30,6 +30,9 @@ export class UpdateUserDto {
     hotel_id: number;
 
     @IsOptional()
+    isActive: boolean;
+
+    @IsOptional()
     @Type(() => Number)
     @IsInt({ message: 'role_id phải là số nguyên' })
     role_id: number;
