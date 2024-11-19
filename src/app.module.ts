@@ -28,6 +28,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { FloorEntity } from './entities/floor.entity';
+import { InvoiceItemEntity } from './entities/invoiceItems.entity';
+import { InvoicePaymentEntity } from './entities/invoicePayments.entity';
+import { ServiceEntity } from './entities/service.entity';
+import { CategoryEntity } from './entities/category.entity';
 
 @Module({
   imports: [
@@ -49,6 +53,10 @@ import { FloorEntity } from './entities/floor.entity';
         BookingEntity,
         InvoiceEntity,
         FloorEntity,
+        InvoiceItemEntity,
+        InvoicePaymentEntity,
+        ServiceEntity,
+        CategoryEntity,
       ],
       synchronize: true,
     }),

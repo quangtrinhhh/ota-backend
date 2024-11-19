@@ -1,6 +1,7 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BookingEntity } from "./booking.entity";
 import { HotelEntity } from "./hotel.entity";
+import { CustomerEntity } from "./customer.entity";
 
 @Entity('invoice')
 export class InvoiceEntity extends BaseEntity {
@@ -12,6 +13,20 @@ export class InvoiceEntity extends BaseEntity {
 
     @Column()
     total_amount: number;
+
+    // Thêm trường giảm giá vào bảng invoice
+    @Column({ nullable: true, default: 0 })
+    discount_amount: number;  // Giảm giá theo số tiền
+
+    @Column({ nullable: true, default: 0 })
+    discount_percentage: number;  // Giảm giá theo phần trăm
+
+    @ManyToOne(() => CustomerEntity, customer => customer.id)
+    @JoinColumn({ name: 'customer_id' })
+    customer: CustomerEntity;
+
+    @Column()
+    customer_id: number;
 
     @Column({
         type: 'enum',
