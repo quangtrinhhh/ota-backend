@@ -27,6 +27,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { FloorEntity } from './entities/floor.entity';
+import { TransactionEntity } from './entities/transaction.entity';
+import { BankTransactionEntity } from './entities/bankTransaction.entity';
+import { CashTransactionEntity } from './entities/cashTransaction.entity';
+import { TransactionModule } from './modules/Transaction/transaction.module';
 
 @Module({
   imports: [
@@ -48,6 +52,9 @@ import { FloorEntity } from './entities/floor.entity';
         BookingEntity,
         InvoiceEntity,
         FloorEntity,
+        TransactionEntity,
+        BankTransactionEntity,
+        CashTransactionEntity,
       ],
       synchronize: true,
     }),
@@ -86,6 +93,7 @@ import { FloorEntity } from './entities/floor.entity';
     AuthModule,
     CustomerModule,
     InvoiceModule,
+    TransactionModule,
   ],
   controllers: [AppController],
   providers: [
