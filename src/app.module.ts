@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -32,6 +31,10 @@ import { InvoiceItemEntity } from './entities/invoiceItems.entity';
 import { InvoicePaymentEntity } from './entities/invoicePayments.entity';
 import { ServiceEntity } from './entities/service.entity';
 import { CategoryEntity } from './entities/category.entity';
+import { InvoicePaymentModule } from './modules/invoicePayments/invoicePayment.module';
+import { InvoiceItemModule } from './modules/invoiceItems/invoiceItem.module';
+import { CategoryModule } from './modules/categories/category.module';
+import { ServiceModule } from './modules/services/service.module';
 
 @Module({
   imports: [
@@ -95,6 +98,10 @@ import { CategoryEntity } from './entities/category.entity';
     AuthModule,
     CustomerModule,
     InvoiceModule,
+    InvoicePaymentModule,
+    InvoiceItemModule,
+    CategoryModule,
+    ServiceModule,
   ],
   controllers: [AppController],
   providers: [

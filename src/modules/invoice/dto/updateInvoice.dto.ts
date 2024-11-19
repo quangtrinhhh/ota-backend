@@ -10,11 +10,23 @@ export class UpdateInvoiceDto {
     total_amount?: number;
 
     @IsOptional()
-    @IsEnum(['Cash' , 'Credit_card' , 'Bank_transfer'])
+    @IsInt()
+    discount_amount: number;
+
+    @IsOptional()
+    @IsInt()
+    discount_percentage: number;
+
+    @IsOptional()
+    @IsInt()
+    customer_id: number;
+
+    @IsOptional()
+    @IsEnum(['Cash', 'Credit_card', 'Bank_transfer'])
     payment_method?: 'Cash' | 'Credit_card' | 'Bank_transfer';
 
     @IsOptional()
-    @IsEnum(['Paid' , 'Unpaid'])
+    @IsEnum(['Paid', 'Unpaid'])
     status?: 'Paid' | 'Unpaid';
 
     @IsOptional()

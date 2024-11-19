@@ -11,7 +11,7 @@ export class InvoiceItemEntity extends BaseEntity {
     @JoinColumn({ name: 'service_id' })
     service: ServiceEntity;
 
-    @Column()
+    @Column({ nullable: true })
     service_id: number;
 
     @Column()

@@ -6,7 +6,7 @@ export class InvoicePaymentEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @CreateDateColumn({ type: 'timestamp' })
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     payment_date: Date;
 
     @Column()

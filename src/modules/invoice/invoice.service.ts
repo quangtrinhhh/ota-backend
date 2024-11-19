@@ -11,13 +11,13 @@ export class InvoiceService {
     constructor(
         @InjectRepository(InvoiceEntity)
         private readonly invoiceRepository: Repository<InvoiceEntity>,
-    ) {}
+    ) { }
 
     // Lấy danh sách tất cả hóa đơn
     async getInvoices(): Promise<Invoice[]> {
         const invoices = await this.invoiceRepository.find();
         return invoices.map(
-            (invoice) => new Invoice(invoice.id, invoice.issue_at, invoice.total_amount, invoice.payment_method, invoice.status, invoice.booking_id, invoice.hotel_id),
+            (invoice) => new Invoice(invoice.id, invoice.issue_at, invoice.total_amount, invoice.discount_amount, invoice.discount_percentage, invoice.customer_id, invoice.payment_method, invoice.status, invoice.booking_id, invoice.hotel_id),
         );
     }
 
@@ -27,7 +27,7 @@ export class InvoiceService {
         if (!invoice) {
             throw new NotFoundException(`Invoice with ID ${id} not found`);
         }
-        return new Invoice(invoice.id, invoice.issue_at, invoice.total_amount, invoice.payment_method, invoice.status, invoice.booking_id, invoice.hotel_id);
+        return new Invoice(invoice.id, invoice.issue_at, invoice.total_amount, invoice.discount_amount, invoice.discount_percentage, invoice.customer_id, invoice.payment_method, invoice.status, invoice.booking_id, invoice.hotel_id);
     }
 
     // Tạo mới hóa đơn
@@ -36,14 +36,14 @@ export class InvoiceService {
             ...createInvoiceDto,
         });
         await this.invoiceRepository.save(invoice);
-        return new Invoice(invoice.id, invoice.issue_at, invoice.total_amount, invoice.payment_method, invoice.status, invoice.booking_id, invoice.hotel_id);
+        return new Invoice(invoice.id, invoice.issue_at, invoice.total_amount, invoice.discount_amount, invoice.discount_percentage, invoice.customer_id, invoice.payment_method, invoice.status, invoice.booking_id, invoice.hotel_id);
     }
 
     // Cập nhật hóa đơn theo ID
     async updateInvoice(id: number, updateInvoiceDto: UpdateInvoiceDto) {
-        const invoice = await this.getDetailInvoice(id); 
-        Object.assign(invoice, updateInvoiceDto); 
-        await this.invoiceRepository.save(invoice); 
+        const invoice = await this.getDetailInvoice(id);
+        Object.assign(invoice, updateInvoiceDto);
+        await this.invoiceRepository.save(invoice);
         return 'Update success';
     }
 
