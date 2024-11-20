@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -95,7 +96,7 @@ export class TransactionController {
       );
     } catch (error) {}
   }
-  @Get('bank')
+  @Get('bank')  
   @UseGuards(JwtAuthGuard)
   async getBankTransactionsByHotelId(
     @GetUser()
@@ -188,4 +189,23 @@ export class TransactionController {
     } catch (error) {}
   }
   //--------------------------------------------------
+  // lấy 1 thông tin
+  @Get(':id')
+  async getTransactionById(@Param('id', ParseIntPipe) id: number) {
+    try {
+      // Gọi hàm trong service để lấy thông tin phiếu
+      const transactionDetails =
+        await this.TransactionService.getTransactionDetailsById(id);
+
+      // Trả về dữ liệu phiếu
+      return new ResponData(
+        transactionDetails,
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
+    } catch (error) {
+      // Xử lý lỗi
+      return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
 }

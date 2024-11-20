@@ -376,4 +376,59 @@ export class TransactionService {
     return updatedTransaction;
   }
   //-----------------------------------------------------------------------------
+  async getTransactionDetailsById(id: number): Promise<any> {
+    // Tìm phiếu giao dịch trong bảng transaction
+    const transaction = await this.transactionRepository.findOne({
+      where: { id },
+      relations: ['user'], // Thêm quan hệ với user để lấy thông tin người tạo
+    });
+
+    if (!transaction) {
+      throw new Error('Transaction not found');
+    }
+
+    let extraDetails = null;
+
+    // Kiểm tra loại thanh toán để lấy thông tin chi tiết
+    if (transaction.paymentType === 'bank') {
+      // Lấy thông tin từ bảng bank_transaction
+      const bankTransaction = await this.bankTransactionRepository.findOne({
+        where: { transaction_id: id },
+      });
+
+      if (bankTransaction) {
+        extraDetails = {
+          receiverAccount: bankTransaction.receiverAccount,
+          receiverName: bankTransaction.receiverName,
+          bankAmount: bankTransaction.bankAmount,
+        };
+      }
+    } else if (transaction.paymentType === 'cash') {
+      // Lấy thông tin từ bảng cash_transaction
+      const cashTransaction = await this.cashTransactionRepository.findOne({
+        where: { transaction_id: id },
+      });
+
+      if (cashTransaction) {
+        extraDetails = {
+          cashAmount: cashTransaction.cashAmount,
+        };
+      }
+    }
+
+    // Trả về thông tin phiếu giao dịch
+    return {
+      ID: transaction.id,
+      Code: transaction.code,
+      Content: transaction.content,
+      Note: transaction.note,
+      Amount: transaction.amount,
+      TransactionType: transaction.transactionType,
+      PaymentType: transaction.paymentType,
+      CreatedBy: transaction.user ? transaction.user.user_name : null,
+      CreatedAt: transaction.created_at,
+      HotelId: transaction.hotel_id,
+      ExtraDetails: extraDetails,
+    };
+  }
 }
