@@ -138,7 +138,14 @@ export class TransactionService {
     const [transactions, total] = await this.transactionRepository.findAndCount(
       {
         where: { hotel_id: hotelId, paymentType: type }, // Lọc theo hotel_id và loại thanh toán
-        select: ['id', 'code', 'amount', 'content', 'created_at'], // Chỉ chọn các trường cần thiết
+        select: [
+          'id',
+          'code',
+          'amount',
+          'content',
+          'created_at',
+          'transactionType',
+        ], // Chỉ chọn các trường cần thiết
         skip: offset, // Bỏ qua số lượng giao dịch theo trang
         take: limit, // Giới hạn số lượng giao dịch theo trang
       },
@@ -345,6 +352,7 @@ export class TransactionService {
       content: updateDto.content ?? transaction.content,
       note: updateDto.note ?? transaction.note,
       amount: updateDto.amount ?? transaction.amount,
+      created_at: updateDto.created_at ?? transaction.created_at,
     });
 
     const updatedTransaction =
