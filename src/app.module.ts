@@ -27,14 +27,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { FloorEntity } from './entities/floor.entity';
-import { InvoiceItemEntity } from './entities/invoiceItems.entity';
-import { InvoicePaymentEntity } from './entities/invoicePayments.entity';
-import { ServiceEntity } from './entities/service.entity';
-import { CategoryEntity } from './entities/category.entity';
-import { InvoicePaymentModule } from './modules/invoicePayments/invoicePayment.module';
-import { InvoiceItemModule } from './modules/invoiceItems/invoiceItem.module';
-import { CategoryModule } from './modules/categories/category.module';
-import { ServiceModule } from './modules/services/service.module';
+import { TransactionEntity } from './entities/transaction.entity';
+import { BankTransactionEntity } from './entities/bankTransaction.entity';
+import { CashTransactionEntity } from './entities/cashTransaction.entity';
+import { TransactionModule } from './modules/Transaction/transaction.module';
 
 @Module({
   imports: [
@@ -56,10 +52,9 @@ import { ServiceModule } from './modules/services/service.module';
         BookingEntity,
         InvoiceEntity,
         FloorEntity,
-        InvoiceItemEntity,
-        InvoicePaymentEntity,
-        ServiceEntity,
-        CategoryEntity,
+        TransactionEntity,
+        BankTransactionEntity,
+        CashTransactionEntity,
       ],
       synchronize: true,
     }),
@@ -86,7 +81,7 @@ import { ServiceModule } from './modules/services/service.module';
             strict: true,
           },
         },
-      })
+      }),
     }),
     HotelModule,
     RoleModule,
@@ -98,10 +93,7 @@ import { ServiceModule } from './modules/services/service.module';
     AuthModule,
     CustomerModule,
     InvoiceModule,
-    InvoicePaymentModule,
-    InvoiceItemModule,
-    CategoryModule,
-    ServiceModule,
+    TransactionModule,
   ],
   controllers: [AppController],
   providers: [
@@ -113,5 +105,5 @@ import { ServiceModule } from './modules/services/service.module';
   ],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
 }
