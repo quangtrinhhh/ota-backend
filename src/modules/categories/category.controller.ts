@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, ValidationPipe } from "@nestjs/common";
 import { CategoryService } from "./category.service";
 import { HttpMessage, HttpStatus } from "src/global/globalEnum";
 import { ResponData } from "src/global/globalClass";
@@ -15,7 +15,17 @@ export class CategoryController {
         try {
             return new ResponData<Category[]>(await this.categoryService.getCategories(), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
-            return new ResponData<Category[]>(await this.categoryService.getCategories(), HttpStatus.ERROR, HttpMessage.ERROR);
+            return new ResponData<Category[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+        }
+    }
+
+    @Get('/categoriesByHotelId/:hotel_id')
+    async getCategoriesByHotelId(@Param('hotel_id', ParseIntPipe) hotel_id: number
+    ): Promise<ResponData<Category[]>> {
+        try {
+            return new ResponData<Category[]>(await this.categoryService.getCategoriesByHotelId(hotel_id), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+        } catch (error) {
+            return new ResponData<Category[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
 

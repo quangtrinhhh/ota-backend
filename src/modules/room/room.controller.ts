@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   ValidationPipe,
@@ -53,20 +54,24 @@ export class roomController {
     }
   }
 
-  @Get('info-bookings')
-  async getAllRoomsWithBookings(): Promise<ResponData<any>> {
+  @Get('info-bookings/:hotel_id')
+  async getAllRoomsWithBookings(
+    @Param('hotel_id', ParseIntPipe) hotel_id: number
+  ): Promise<ResponData<any>> {
     try {
-      const rooms = await this.roomService.getAllRoomsWithBookings();
+      const rooms = await this.roomService.getAllRoomsWithBookings(hotel_id);
       return new ResponData(rooms, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
     } catch (error) {
       return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
 
-  @Get('info-bookingsToday')
-  async getAllRoomsWithBookingsToday(): Promise<ResponData<any>> {
+  @Get('info-bookingsToday/:hotel_id')
+  async getAllRoomsWithBookingsToday(
+    @Param('hotel_id', ParseIntPipe) hotel_id: number
+  ): Promise<ResponData<any>> {
     try {
-      const rooms = await this.roomService.getAllRoomsWithBookingsToday();
+      const rooms = await this.roomService.getAllRoomsWithBookingsToday(hotel_id);
       return new ResponData(rooms, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
     } catch (error) {
       return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);

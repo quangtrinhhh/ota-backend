@@ -48,4 +48,24 @@ export class ServiceService {
         await this.serviceRepository.delete(id);
         return `Delete service ${id} success`;
     }
+
+    async getServicesByHotelId(hotel_id: number): Promise<Service[]> {
+        const services = await this.serviceRepository.find({
+            where: { category: { hotel_id } },
+            relations: ['category', 'category.hotel'],
+        });
+
+        return services.map(service => ({
+            id: service.id,
+            name: service.name,
+            description: service.description,
+            unit_price: service.unit_price,
+            category: {
+                id: service.category.id,
+                name: service.category.name,
+                description: service.category.description,
+                hotel_id: service.category.hotel_id,
+            }
+        }));
+    }
 }

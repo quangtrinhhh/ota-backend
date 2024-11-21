@@ -15,21 +15,27 @@ export class CategoryService {
 
     async getCategories(): Promise<Category[]> {
         const categories = await this.categoryRepository.find();
-        return categories.map(category => new Category(category.id, category.name, category.description));
+        return categories.map(category => new Category(category.id, category.name, category.description, category.hotel_id));
+    }
+
+    async getCategoriesByHotelId(hotel_id: number): Promise<Category[]> {
+        const categories = await this.categoryRepository.find({ where: { hotel_id } });
+        return categories.map(category => new Category(category.id, category.name, category.description, category.hotel_id));
     }
 
     async findOneCategory(id: number): Promise<Category> {
         const category = await this.categoryRepository.findOne({ where: { id } });
-        return new Category(category.id, category.name, category.description);
+        return new Category(category.id, category.name, category.description, category.hotel_id);
     }
 
     async createCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
         const category = new Category();
         category.name = createCategoryDto.name;
         category.description = createCategoryDto.description;
+        category.hotel_id = createCategoryDto.hotel_id;
 
         await this.categoryRepository.save(category);
-        return new Category(category.id, category.name, category.description);
+        return new Category(category.id, category.name, category.description, category.hotel_id);
 
     }
 
@@ -39,7 +45,7 @@ export class CategoryService {
         await this.categoryRepository.update(id, updateCategoryData);
 
         const category = await this.categoryRepository.findOne({ where: { id } })
-        return new Category(category.id, category.name, category.description);
+        return new Category(category.id, category.name, category.description, category.hotel_id);
     }
 
     async deleteCategory(id: number): Promise<string> {

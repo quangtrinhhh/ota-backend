@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, ValidationPipe } from "@nestjs/common";
 import { ServiceService } from "./service.service";
 import { HttpMessage, HttpStatus } from "src/global/globalEnum";
 import { ResponData } from "src/global/globalClass";
@@ -15,7 +15,18 @@ export class ServiceController {
         try {
             return new ResponData<Service[]>(await this.serviceService.getServices(), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
-            return new ResponData<Service[]>(await this.serviceService.getServices(), HttpStatus.ERROR, HttpMessage.ERROR);
+            return new ResponData<Service[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+        }
+    }
+
+    @Get('servicesByHotelId/:hotel_id')
+    async getServicesByHotelId(
+        @Param('hotel_id', ParseIntPipe) hotel_id: number
+    ): Promise<ResponData<Service[]>> {
+        try {
+            return new ResponData<Service[]>(await this.serviceService.getServicesByHotelId(hotel_id), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+        } catch (error) {
+            return new ResponData<Service[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
 

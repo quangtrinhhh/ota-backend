@@ -7,6 +7,7 @@ import { HotelEntity } from 'src/entities/hotel.entity';
 import { HttpException } from '@nestjs/common';
 import { HttpStatus } from 'src/global/globalEnum';
 import { UpdateRoomDto } from './dto/updateRoom.dto';
+import { log } from 'console';
 
 export class RoomService {
   constructor(
@@ -86,8 +87,9 @@ export class RoomService {
     return await this.roomRepository.find();
   }
 
-  async getAllRoomsWithBookings(): Promise<any> {
+  async getAllRoomsWithBookings(hotel_id: number): Promise<any> {
     const rooms = await this.roomRepository.find({
+      where: { hotel: { id: hotel_id } },
       relations: [
         'room_type',  // Liên kết với RoomType
         'floor',      // Liên kết với Floor
@@ -105,9 +107,11 @@ export class RoomService {
       price: room.price,
       room_type: room.room_type?.name,  // Lấy tên loại phòng
       floor: room.floor?.name,          // Lấy tên tầng
-      hotel: room.hotel?.name,          // Lấy tên khách sạn
+      hotel: room.hotel?.name,
+      hotel_id: room.hotel?.id,       // Lấy tên khách sạn
       bookings: room.booking_rooms.map(bookingRoom => ({
         id: bookingRoom.booking.id,
+        booking_at: bookingRoom.booking.booking_at,
         check_in_at: bookingRoom.booking.check_in_at,
         check_out_at: bookingRoom.booking.check_out_at,
         status: bookingRoom.booking.status,
@@ -115,7 +119,7 @@ export class RoomService {
     }));
   }
 
-  async getAllRoomsWithBookingsToday(): Promise<any> {
+  async getAllRoomsWithBookingsToday(hotel_id: number): Promise<any> {
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);  // Đặt giờ thành 00:00:00 để so sánh với ngày hôm nay
@@ -128,6 +132,7 @@ export class RoomService {
 
       // Lấy tất cả các phòng cùng với thông tin booking
       const rooms = await this.roomRepository.find({
+        where: { hotel: { id: hotel_id } },
         relations: [
           'room_type',
           'floor',
@@ -143,17 +148,19 @@ export class RoomService {
       const allRooms = [];
 
       rooms.forEach(room => {
-        // Lọc các booking của phòng, chỉ lấy booking có check_in_at là hôm nay
+        // Lọc các booking của phòng, chỉ lấy booking có đặt phòng là hôm nay
         const bookingsToday = room.booking_rooms.filter(bookingRoom => {
-          const checkInDate = new Date(bookingRoom.booking.check_in_at);
-          return checkInDate >= today && checkInDate < tomorrow;
+          const bookingDate = new Date(bookingRoom.booking.booking_at);
+          return bookingDate >= today && bookingDate < tomorrow;
         });
 
         // Lọc các booking của phòng, chỉ lấy booking có check_in_at là hôm qua và check_out_at chưa qua hôm nay
         const bookingsInUse = room.booking_rooms.filter(bookingRoom => {
           const checkInDate = new Date(bookingRoom.booking.check_in_at);
           const checkOutDate = new Date(bookingRoom.booking.check_out_at);
-          return checkInDate >= yesterday && checkInDate < today && checkOutDate >= today;
+
+          // Kiểm tra check_in_at là sau ngày hôm qua và check_out_at chưa qua hôm nay
+          return checkInDate <= yesterday && checkInDate < today && checkOutDate >= today;
         });
 
         const roomData = {
@@ -165,14 +172,16 @@ export class RoomService {
           room_type: room.room_type?.name,
           floor: room.floor,
           hotel: room.hotel?.name,
+          hotel_id: room.hotel?.id,
           bookings: bookingsToday.length > 0 || bookingsInUse.length > 0
             ? [...bookingsToday, ...bookingsInUse].map(bookingRoom => ({
               id: bookingRoom.booking.id,
+              booking_at: bookingRoom.booking.booking_at,
               check_in_at: bookingRoom.booking.check_in_at,
               check_out_at: bookingRoom.booking.check_out_at,
               status: bookingRoom.booking.status,
             }))
-            : null, // Nếu không có booking nào thì trả về null
+            : null,
         };
 
         allRooms.push(roomData);

@@ -6,4 +6,8 @@ export class CreateCategoryDto {
 
     @IsNotEmpty({ message: 'description không được để trống' })
     description: string;
+
+
+    @IsNotEmpty({ message: 'hotel_id không được để trống' })
+    hotel_id: number;
 }

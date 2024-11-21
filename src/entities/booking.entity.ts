@@ -8,7 +8,7 @@ export class BookingEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number
 
-    @CreateDateColumn({ type: 'timestamp' }) // Tự động lấy thời gian tạo bản ghi
+    @CreateDateColumn({ type: 'timestamp' })
     booking_at: Date;
 
     @Column({ type: 'timestamp', nullable: true })
