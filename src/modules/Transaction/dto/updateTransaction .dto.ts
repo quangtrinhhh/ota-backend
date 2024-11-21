@@ -30,4 +30,8 @@ export class UpdateTransactionDto {
   @IsOptional()
   @IsString()
   receiverName?: string;
+
+  @IsOptional()
+  @IsString()
+  created_at?: Date;    
 }
