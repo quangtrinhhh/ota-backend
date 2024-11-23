@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BankTransactionEntity } from 'src/entities/bankTransaction.entity';
 import { CashTransactionEntity } from 'src/entities/cashTransaction.entity';
 import { TransactionEntity } from 'src/entities/transaction.entity';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateTransactionDto } from './dto/createTransaction.dto';
 import { UserEntity } from 'src/entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
@@ -112,192 +112,162 @@ export class TransactionService {
 
   // ------------------------------------------------------------------------------------------
   // Hàm lấy danh sách phiếu thu/chi tiền
-  async getCashTransactions(
-    id: number,
-    type: string,
-    page: number = 1,
-    limit: number = 8,
-  ): Promise<{
-    total: number;
-    totalPages: number;
-    currentPage: number;
-    transactions: any[];
-  }> {
-    // Lấy thông tin người dùng từ userId
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    const hotelId = user.hotel_id; // Lấy hotel_id từ user
-
-    // Tính toán phân trang
-    const offset = (page - 1) * limit;
-
-    // Truy vấn tổng số giao dịch để tính tổng số trang
-    const [transactions, total] = await this.transactionRepository.findAndCount(
-      {
-        where: { hotel_id: hotelId, paymentType: type }, // Lọc theo hotel_id và loại thanh toán
-        select: [
-          'id',
-          'code',
-          'amount',
-          'content',
-          'created_at',
-          'transactionType',
-        ], // Chỉ chọn các trường cần thiết
-        skip: offset, // Bỏ qua số lượng giao dịch theo trang
-        take: limit, // Giới hạn số lượng giao dịch theo trang
-      },
-    );
-
-    // Tính tổng số trang
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-      total, // Tổng số giao dịch
-      totalPages, // Tổng số trang
-      currentPage: page, // Trang hiện tại
-      transactions: transactions,
-    };
-  }
   //---
-  async getBankTransactions(
-    id: number,
-    page: number = 1,
-    limit: number = 8,
-    type: string,
-  ): Promise<{
-    total: number;
-    totalPages: number;
-    currentPage: number;
-    transactions: any[];
-  }> {
-    // Lấy thông tin người dùng từ userId
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new Error('User not found');
-    }
+  // async getBankTransactions(
+  //   id: number,
+  //   page: number = 1,
+  //   limit: number = 8,
+  //   type: string,
+  //   fromDate?: string, // Thêm tham số từ ngày
+  //   toDate?: string, // Thêm tham số đến ngày
+  // ): Promise<{
+  //   total: number;
+  //   totalPages: number;
+  //   currentPage: number;
+  //   transactions: any[];
+  // }> {
+  //   // Lấy thông tin người dùng từ userId
+  //   const user = await this.userRepository.findOne({ where: { id } });
+  //   if (!user) {
+  //     throw new Error('User not found');
+  //   }
 
-    const hotelId = user.hotel_id; // Lấy hotel_id từ user
+  //   const hotelId = user.hotel_id; // Lấy hotel_id từ user
 
-    // Tính toán phân trang
-    const offset = (page - 1) * limit;
+  //   // Tính toán phân trang
+  //   const offset = (page - 1) * limit;
 
-    // Truy vấn tổng số giao dịch ngân hàng để tính tổng số trang
-    const [transactions, total] = await this.transactionRepository.findAndCount(
-      {
-        where: { hotel_id: hotelId, paymentType: 'bank' }, // Lọc theo hotel_id và loại thanh toán bank
-        relations: ['bankTransaction'], // Liên kết với bảng bank_transaction
-        skip: offset, // Bỏ qua số lượng giao dịch theo trang
-        take: limit, // Giới hạn số lượng giao dịch theo trang
-      },
-    );
+  //   // Khởi tạo truy vấn
+  //   const query = this.transactionRepository
+  //     .createQueryBuilder('transaction')
+  //     .leftJoinAndSelect('transaction.bankTransaction', 'bankTransaction') // Liên kết với bảng bankTransaction
+  //     .where('transaction.hotel_id = :hotelId', { hotelId })
+  //     .andWhere('transaction.paymentType = :paymentType', {
+  //       paymentType: 'bank',
+  //     });
 
-    // Định dạng lại dữ liệu trả về
-    const formattedTransactions = transactions.map((transaction) => ({
-      id: transaction.id, // ID giao dịch
-      code: transaction.code, // Mã giao dịch
-      amount: Number(transaction.amount), // Số tiền giao dịch
-      content: transaction.content, // Nội dung giao dịch
-      date: transaction.created_at, // Ngày tạo giao dịch
-      receiverAccount: transaction.bankTransaction?.receiverAccount || null, // Số tài khoản người nhận
-      receiverName: transaction.bankTransaction?.receiverName || null, // Tên người nhận
-    }));
+  //   // Lọc theo khoảng thời gian nếu có
+  //   if (fromDate) {
+  //     const parsedFromDate = new Date(fromDate);
+  //     if (!isNaN(parsedFromDate.getTime())) {
+  //       query.andWhere('transaction.created_at >= :fromDate', {
+  //         fromDate: parsedFromDate,
+  //       });
+  //     }
+  //   }
 
-    // Tính tổng số trang
-    const totalPages = Math.ceil(total / limit);
+  //   if (toDate) {
+  //     const parsedToDate = new Date(toDate);
+  //     if (!isNaN(parsedToDate.getTime())) {
+  //       query.andWhere('transaction.created_at <= :toDate', {
+  //         toDate: parsedToDate,
+  //       });
+  //     }
+  //   }
 
-    return {
-      total, // Tổng số giao dịch
-      totalPages, // Tổng số trang
-      currentPage: page, // Trang hiện tại
-      transactions: formattedTransactions, // Danh sách giao dịch được định dạng
-    };
-  }
+  //   // Truy vấn tổng số giao dịch để tính tổng số trang
+  //   const [transactions, total] = await query
+  //     .skip(offset) // Bỏ qua số lượng giao dịch theo trang
+  //     .take(limit) // Giới hạn số lượng giao dịch theo trang
+  //     .getManyAndCount();
+
+  //   // Định dạng lại dữ liệu trả về
+  //   const formattedTransactions = transactions.map((transaction) => ({
+  //     id: transaction.id, // ID giao dịch
+  //     code: transaction.code, // Mã giao dịch
+  //     amount: Number(transaction.amount), // Số tiền giao dịch
+  //     content: transaction.content, // Nội dung giao dịch
+  //     date: transaction.created_at, // Ngày tạo giao dịch
+  //     receiverAccount: transaction.bankTransaction?.receiverAccount || null, // Số tài khoản người nhận
+  //     receiverName: transaction.bankTransaction?.receiverName || null, // Tên người nhận
+  //   }));
+
+  //   // Tính tổng số trang
+  //   const totalPages = Math.ceil(total / limit);
+
+  //   return {
+  //     total, // Tổng số giao dịch
+  //     totalPages, // Tổng số trang
+  //     currentPage: page, // Trang hiện tại
+  //     transactions: formattedTransactions, // Danh sách giao dịch được định dạng
+  //   };
+  // }
 
   // -------------------------------
-  // lấy danh sách so sánh
+
+  // Lấy danh sách chi tiết giao dịch, có lọc theo từ ngày đến ngày
   async getTransactionDetails(
     id: number,
     page: number = 1,
     limit: number = 8,
     type: string,
+    fromDate?: string,
+    toDate?: string,
   ): Promise<any> {
-    // Find user by id
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new Error('User not found');
     }
 
-    const hotelId = user.hotel_id; // Get hotel_id from the user
+    const hotelId = user.hotel_id;
 
-    // Calculate pagination parameters
+    // Tính toán phân trang
     const skip = (page - 1) * limit;
     const take = limit;
 
-    // Include `bankTransaction` relation if type is 'bank'
+    // Chọn các relation tùy thuộc vào loại giao dịch
     const relations = type === 'bank' ? ['user', 'bankTransaction'] : ['user'];
 
-    // Query transactions of the hotel
-    const [transactions, totalCount] =
-      await this.transactionRepository.findAndCount({
-        where: { hotel_id: hotelId, paymentType: type }, // Filter by payment type
-        relations, // Include necessary relations
-        skip,
-        take,
+    // Khởi tạo truy vấn
+    const query = this.transactionRepository
+      .createQueryBuilder('transaction')
+      .leftJoinAndSelect('transaction.user', 'user') // Thêm join để lấy thông tin người tạo
+      .leftJoinAndSelect('transaction.cashTransaction', 'cashTransaction')
+      .where('transaction.hotel_id = :hotelId', { hotelId })
+      .andWhere('transaction.paymentType = :paymentType', {
+        paymentType: type,
       });
 
-    // Map the results into the desired format
+    // Áp dụng bộ lọc thời gian nếu có
+    this.applyDateFilters(query, fromDate, toDate); // Truyền từ và đến ngày vào bộ lọc
+
+    // Thực hiện truy vấn và phân trang
+    const [transactions, totalCount] = await query
+      .skip(skip)
+      .take(take)
+      .getManyAndCount();
+
     const result = transactions.map((transaction) => {
-      const isIncome = transaction.transactionType === 'income'; // Check if it's an income transaction
-
-      // Base transaction details
-      const transactionDetails = {
-        ID: transaction.id, // Transaction ID
-        Date: transaction.created_at, // Transaction date
-        IncomeVoucherCode: isIncome ? transaction.code : null, // Income voucher code (if it's income)
-        ExpenseVoucherCode: !isIncome ? transaction.code : null, // Expense voucher code (if it's expense)
-        TransactionType: transaction.transactionType, // Transaction type (income/expense)
-        IncomeAmount: isIncome ? Number(transaction.amount) : null, // Income amount (if it's income)
-        ExpenseAmount: !isIncome ? Number(transaction.amount) : null, // Expense amount (if it's expense)
-        CreatedBy: transaction.user ? transaction.user.user_name : null, // Creator's name
-        content: transaction.content, // Content of the transaction
+      const isIncome = transaction.transactionType === 'income';
+      return {
+        ID: transaction.id,
+        Date: transaction.created_at,
+        IncomeVoucherCode: isIncome ? transaction.code : null,
+        ExpenseVoucherCode: !isIncome ? transaction.code : null,
+        TransactionType: transaction.transactionType,
+        IncomeAmount: isIncome ? Number(transaction.amount) : null,
+        ExpenseAmount: !isIncome ? Number(transaction.amount) : null,
+        CreatedBy: transaction.user ? transaction.user.user_name : null, // Lấy tên người tạo giao dịch
+        content: transaction.content,
       };
-
-      // Add bank-specific fields if type is 'bank'
-      if (type === 'bank' && transaction.bankTransaction) {
-        transactionDetails['ReceiverAccount'] =
-          transaction.bankTransaction.receiverAccount;
-        transactionDetails['ReceiverName'] =
-          transaction.bankTransaction.receiverName;
-      }
-
-      return transactionDetails;
     });
 
-    // Calculate total income and expense amounts for all transactions (not just the current page)
-    const allTransactions = await this.transactionRepository.find({
-      where: { hotel_id: hotelId, paymentType: type }, // Filter by payment type
-      relations: type === 'bank' ? ['bankTransaction'] : [], // Include bankTransaction relation if type is 'bank'
-    });
-
-    const totalIncome = allTransactions
+    // Tính toán tổng số tiền thu và chi
+    const totalIncome = transactions
       .filter((transaction) => transaction.transactionType === 'income')
-      .reduce((total, transaction) => total + Number(transaction.amount), 0); // Ensure amount is treated as a number
+      .reduce((total, transaction) => total + Number(transaction.amount), 0);
 
-    const totalExpense = allTransactions
+    const totalExpense = transactions
       .filter((transaction) => transaction.transactionType === 'expense')
-      .reduce((total, transaction) => total + Number(transaction.amount), 0); // Ensure amount is treated as a number
+      .reduce((total, transaction) => total + Number(transaction.amount), 0);
 
-    // Calculate total pages
     const totalPages = Math.ceil(totalCount / limit);
 
     return {
-      totalPages, // Total number of pages
-      totalIncome, // Total income amount for all transactions
-      totalExpense, // Total expense amount for all transactions
-      transactions: result, // List of transactions for the current page
+      totalPages,
+      totalIncome,
+      totalExpense,
+      transactions: result,
     };
   }
 
@@ -437,6 +407,162 @@ export class TransactionService {
       CreatedAt: transaction.created_at,
       HotelId: transaction.hotel_id,
       ExtraDetails: extraDetails,
+    };
+  }
+  // -------------------------------------------------------------------------------------
+
+  /**
+   * Lấy ID khách sạn của người dùng
+   */
+  async getHotelIdByUser(userId: number): Promise<number> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) throw new Error('User not found');
+    return user.hotel_id;
+  }
+
+  /**
+   * Áp dụng bộ lọc theo ngày bắt đầu và ngày kết thúc
+   */
+  applyDateFilters(
+    query: any,
+    fromDate: string | undefined,
+    toDate: string | undefined,
+  ) {
+    // Lọc theo ngày nếu có `fromDate` và `toDate`
+    if (fromDate) {
+      const parsedFromDate = new Date(fromDate); // Chuyển đổi fromDate thành đối tượng Date
+      if (!isNaN(parsedFromDate.getTime())) {
+        // Đảm bảo ngày bắt đầu là 00:00:00 (chỉ so sánh ngày, không tính giờ)
+        parsedFromDate.setHours(0, 0, 0, 0); // Reset giờ phút giây để chỉ so sánh ngày
+        query.andWhere('transaction.created_at >= :fromDate', {
+          fromDate: parsedFromDate,
+        });
+      } else {
+        throw new Error('Invalid fromDate format');
+      }
+    }
+
+    if (toDate) {
+      const parsedToDate = new Date(toDate); // Chuyển đổi toDate thành đối tượng Date
+      if (!isNaN(parsedToDate.getTime())) {
+        // Đảm bảo ngày kết thúc là 23:59:59 (chỉ so sánh ngày, không tính giờ)
+        parsedToDate.setHours(23, 59, 59, 999); // Reset giờ phút giây để bao gồm cả ngày
+        query.andWhere('transaction.created_at <= :toDate', {
+          toDate: parsedToDate,
+        });
+      } else {
+        throw new Error('Invalid toDate format');
+      }
+    }
+  }
+
+  /**
+   * Lấy phiếu thu chi tiền mặt
+   */
+  async getCashhTransactions(
+    userId: number,
+    type?: 'income' | 'expense',
+    dateRange?: string,
+    fromDate?: string,
+    toDate?: string,
+    page = 1,
+    limit = 8,
+  ) {
+    console.log('service:', type, fromDate, toDate);
+
+    const hotelId = await this.getHotelIdByUser(userId);
+
+    // Khởi tạo query cơ bản
+    const query = this.transactionRepository
+      .createQueryBuilder('transaction')
+      .leftJoinAndSelect('transaction.cashTransaction', 'cashTransaction')
+      .where('transaction.hotel_id = :hotelId', { hotelId })
+      .andWhere('transaction.paymentType = :paymentType', {
+        paymentType: 'cash',
+      });
+
+    // Áp dụng bộ lọc theo loại giao dịch nếu có
+    if (type) {
+      query.andWhere('transaction.transactionType = :type', { type });
+    }
+
+    // Áp dụng bộ lọc thời gian (dateRange, fromDate, toDate)
+    this.applyDateFilters(query, fromDate, toDate);
+
+    // Phân trang
+    const [transactions, total] = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    // Trả về kết quả
+    return {
+      transactions,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+  /**
+   * Lấy phiếu thu chi ngân hàng
+   */
+  async getBankTransactions(
+    userId: number,
+    type?: 'income' | 'expense',
+    dateRange?: string,
+    fromDate?: string,
+    toDate?: string,
+    page = 1,
+    limit = 8,
+  ) {
+    console.log('service:', type, fromDate, toDate);
+
+    const hotelId = await this.getHotelIdByUser(userId);
+
+    // Khởi tạo query cơ bản cho giao dịch ngân hàng
+    const query = this.transactionRepository
+      .createQueryBuilder('transaction')
+      .leftJoinAndSelect('transaction.bankTransaction', 'bankTransaction') // Thay thế với bankTransaction
+      .where('transaction.hotel_id = :hotelId', { hotelId })
+      .andWhere('transaction.paymentType = :paymentType', {
+        paymentType: 'bank',
+      });
+
+    // Áp dụng bộ lọc theo loại giao dịch nếu có
+    if (type) {
+      query.andWhere('transaction.transactionType = :type', { type });
+    }
+
+    // Áp dụng bộ lọc thời gian (dateRange, fromDate, toDate)
+    this.applyDateFilters(query, fromDate, toDate);
+
+    // Phân trang
+    const [transactions, total] = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    // Định dạng lại kết quả giao dịch ngân hàng
+    const formattedTransactions = transactions.map((transaction) => ({
+      id: transaction.id, // ID giao dịch
+      code: transaction.code, // Mã giao dịch
+      amount: Number(transaction.amount), // Số tiền giao dịch
+      content: transaction.content, // Nội dung giao dịch
+      date: transaction.created_at, // Ngày tạo giao dịch
+      receiverAccount: transaction.bankTransaction?.receiverAccount || null, // Số tài khoản người nhận
+      receiverName: transaction.bankTransaction?.receiverName || null, // Tên người nhận
+    }));
+
+    // Trả về kết quả
+    return {
+      transactions: formattedTransactions,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     };
   }
 }
