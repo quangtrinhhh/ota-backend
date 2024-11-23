@@ -110,89 +110,6 @@ export class TransactionService {
     return savedTransaction;
   }
 
-  // ------------------------------------------------------------------------------------------
-  // Hàm lấy danh sách phiếu thu/chi tiền
-  //---
-  // async getBankTransactions(
-  //   id: number,
-  //   page: number = 1,
-  //   limit: number = 8,
-  //   type: string,
-  //   fromDate?: string, // Thêm tham số từ ngày
-  //   toDate?: string, // Thêm tham số đến ngày
-  // ): Promise<{
-  //   total: number;
-  //   totalPages: number;
-  //   currentPage: number;
-  //   transactions: any[];
-  // }> {
-  //   // Lấy thông tin người dùng từ userId
-  //   const user = await this.userRepository.findOne({ where: { id } });
-  //   if (!user) {
-  //     throw new Error('User not found');
-  //   }
-
-  //   const hotelId = user.hotel_id; // Lấy hotel_id từ user
-
-  //   // Tính toán phân trang
-  //   const offset = (page - 1) * limit;
-
-  //   // Khởi tạo truy vấn
-  //   const query = this.transactionRepository
-  //     .createQueryBuilder('transaction')
-  //     .leftJoinAndSelect('transaction.bankTransaction', 'bankTransaction') // Liên kết với bảng bankTransaction
-  //     .where('transaction.hotel_id = :hotelId', { hotelId })
-  //     .andWhere('transaction.paymentType = :paymentType', {
-  //       paymentType: 'bank',
-  //     });
-
-  //   // Lọc theo khoảng thời gian nếu có
-  //   if (fromDate) {
-  //     const parsedFromDate = new Date(fromDate);
-  //     if (!isNaN(parsedFromDate.getTime())) {
-  //       query.andWhere('transaction.created_at >= :fromDate', {
-  //         fromDate: parsedFromDate,
-  //       });
-  //     }
-  //   }
-
-  //   if (toDate) {
-  //     const parsedToDate = new Date(toDate);
-  //     if (!isNaN(parsedToDate.getTime())) {
-  //       query.andWhere('transaction.created_at <= :toDate', {
-  //         toDate: parsedToDate,
-  //       });
-  //     }
-  //   }
-
-  //   // Truy vấn tổng số giao dịch để tính tổng số trang
-  //   const [transactions, total] = await query
-  //     .skip(offset) // Bỏ qua số lượng giao dịch theo trang
-  //     .take(limit) // Giới hạn số lượng giao dịch theo trang
-  //     .getManyAndCount();
-
-  //   // Định dạng lại dữ liệu trả về
-  //   const formattedTransactions = transactions.map((transaction) => ({
-  //     id: transaction.id, // ID giao dịch
-  //     code: transaction.code, // Mã giao dịch
-  //     amount: Number(transaction.amount), // Số tiền giao dịch
-  //     content: transaction.content, // Nội dung giao dịch
-  //     date: transaction.created_at, // Ngày tạo giao dịch
-  //     receiverAccount: transaction.bankTransaction?.receiverAccount || null, // Số tài khoản người nhận
-  //     receiverName: transaction.bankTransaction?.receiverName || null, // Tên người nhận
-  //   }));
-
-  //   // Tính tổng số trang
-  //   const totalPages = Math.ceil(total / limit);
-
-  //   return {
-  //     total, // Tổng số giao dịch
-  //     totalPages, // Tổng số trang
-  //     currentPage: page, // Trang hiện tại
-  //     transactions: formattedTransactions, // Danh sách giao dịch được định dạng
-  //   };
-  // }
-
   // -------------------------------
 
   // Lấy danh sách chi tiết giao dịch, có lọc theo từ ngày đến ngày
@@ -323,6 +240,7 @@ export class TransactionService {
       note: updateDto.note ?? transaction.note,
       amount: updateDto.amount ?? transaction.amount,
       created_at: updateDto.created_at ?? transaction.created_at,
+      user_id: updateDto.user_id ?? transaction.user_id,
     });
 
     const updatedTransaction =
@@ -406,6 +324,7 @@ export class TransactionService {
       CreatedBy: transaction.user ? transaction.user.user_name : null,
       CreatedAt: transaction.created_at,
       HotelId: transaction.hotel_id,
+      IdUser: transaction.user_id,
       ExtraDetails: extraDetails,
     };
   }

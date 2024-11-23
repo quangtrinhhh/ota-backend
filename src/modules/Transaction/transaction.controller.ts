@@ -74,28 +74,6 @@ export class TransactionController {
     } catch (error) {}
   }
   //----------------------------------------------------
-
-  // @Get('bank')
-  // @UseGuards(JwtAuthGuard)
-  // async getBankTransactionsByHotelId(
-  //   @GetUser()
-  //   user: any,
-  //   @Query('page') page: number = 1,
-  // ) {
-  //   try {
-  //     const id = user._id;
-  //     console.log(id);
-  //     const result = await this.TransactionService.getBankTransactions(
-  //       id,
-  //       page,
-  //       8,
-  //       'bank',
-  //     );
-
-  //     return new ResponData(result, HttpStatus.SUCCESS, 'Láy thành công bank');
-  //   } catch (error) {}
-  // }
-
   @Get('bank')
   @UseGuards(JwtAuthGuard)
   async getBankTransactionsByHotelId(
