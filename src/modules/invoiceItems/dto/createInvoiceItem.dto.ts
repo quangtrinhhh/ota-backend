@@ -4,6 +4,9 @@ export class CreateInvoiceItemDto {
     @IsOptional()
     service_id: number;
 
+    @IsOptional()
+    item_name: string;
+
     @IsNotEmpty({ message: 'quantity không được để trống' })
     quantity: number;
 

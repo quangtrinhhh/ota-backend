@@ -5,6 +5,7 @@ import { InvoiceService } from "./invoice.service";
 import { Invoice } from "src/models/invoice.model";
 import { CreateInvoiceDto } from "./dto/createInvoice.dto";
 import { UpdateInvoiceDto } from "./dto/updateInvoice.dto";
+import { RequestPaymentService } from "./dto/requestPaymentService.dto";
 
 @Controller('invoices')
 export class InvoiceController {
@@ -27,6 +28,19 @@ export class InvoiceController {
             return new ResponData<Invoice>(invoice, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
             return new ResponData<Invoice>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+        }
+    }
+
+
+    @Post('createInvoiceService')
+    async createInvoiceService(@Body() requestPaymentService: RequestPaymentService): Promise<ResponData<string>> {
+        try {
+            return new ResponData<string>(await this.invoiceService.createInvoiceService(requestPaymentService), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+        } catch (error) {
+            if (error.message) {
+                return new ResponData<string>(null, HttpStatus.ERROR, error.message);
+            }
+            return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
 
@@ -60,6 +74,16 @@ export class InvoiceController {
             return new ResponData<string>(message, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
             return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+        }
+    }
+
+    @Get('innvoiceByReceiptAndItemById/:id')
+    async getInvoiceByReceiptAndItemById(@Param('id') id: number): Promise<ResponData<Invoice>> {
+        try {
+            const invoice = await this.invoiceService.getInvoiceByReceiptAndItemById(id);
+            return new ResponData<Invoice>(invoice, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+        } catch (error) {
+            return new ResponData<Invoice>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
 }

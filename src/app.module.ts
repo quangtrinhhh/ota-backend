@@ -31,6 +31,18 @@ import { TransactionEntity } from './entities/transaction.entity';
 import { BankTransactionEntity } from './entities/bankTransaction.entity';
 import { CashTransactionEntity } from './entities/cashTransaction.entity';
 import { TransactionModule } from './modules/Transaction/transaction.module';
+import { InvoiceItemEntity } from './entities/invoiceItems.entity';
+import { InvoicePaymentEntity } from './entities/invoicePayments.entity';
+import { ServiceEntity } from './entities/service.entity';
+import { CategoryEntity } from './entities/category.entity';
+import { InvoiceItemModule } from './modules/invoiceItems/invoiceItem.module';
+import { InvoicePaymentModule } from './modules/invoicePayments/invoicePayment.module';
+import { CategoryModule } from './modules/categories/category.module';
+import { ServiceModule } from './modules/services/service.module';
+import { ExpenseEntity } from './entities/expense.entity';
+import { ReceiptEntity } from './entities/receipt.entity';
+import { ExpenseModule } from './modules/expense/expense.module';
+import { ReceiptModule } from './modules/receips/receip.module';
 
 @Module({
   imports: [
@@ -55,6 +67,12 @@ import { TransactionModule } from './modules/Transaction/transaction.module';
         TransactionEntity,
         BankTransactionEntity,
         CashTransactionEntity,
+        InvoiceItemEntity,
+        InvoicePaymentEntity,
+        ServiceEntity,
+        CategoryEntity,
+        ExpenseEntity,
+        ReceiptEntity,
       ],
       synchronize: true,
     }),
@@ -94,6 +112,12 @@ import { TransactionModule } from './modules/Transaction/transaction.module';
     CustomerModule,
     InvoiceModule,
     TransactionModule,
+    InvoiceItemModule,
+    InvoicePaymentModule,
+    CategoryModule,
+    ServiceModule,
+    ExpenseModule,
+    ReceiptModule,
   ],
   controllers: [AppController],
   providers: [
@@ -105,5 +129,5 @@ import { TransactionModule } from './modules/Transaction/transaction.module';
   ],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 }

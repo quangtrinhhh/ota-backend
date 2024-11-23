@@ -1,6 +1,8 @@
 import { IsEmail, IsNotEmpty, IsEnum, IsDateString, IsInt, IsOptional, MaxLength, MinLength } from "class-validator";
 
 export class CreateCustomerDto {
+    @IsNotEmpty({ message: 'name không được để trống' })
+    name: string;
 
     @IsOptional()
     @MinLength(10, { message: 'Số điện thoại chứa ít nhất 10 ký tự' })
@@ -11,7 +13,7 @@ export class CreateCustomerDto {
     @IsEmail({}, { message: 'email không hợp lệ' })
     email: string;
 
-    @IsEnum(['Male' , 'Female' , 'Other'])
+    @IsEnum(['Male', 'Female', 'Other'])
     gender: 'Male' | 'Female' | 'Other';
 
     @IsNotEmpty()

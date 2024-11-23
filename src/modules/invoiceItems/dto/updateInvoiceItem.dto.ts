@@ -9,6 +9,10 @@ export class UpdateInvoiceItemDto {
     service_id: number;
 
     @IsOptional()
+    @IsNotEmpty({ message: 'item_name không được để trống' })
+    item_name: string;
+
+    @IsOptional()
     @IsNotEmpty({ message: 'quantity không được để trống' })
     quantity: number;
 

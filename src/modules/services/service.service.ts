@@ -20,6 +20,9 @@ export class ServiceService {
 
     async findOneService(id: number): Promise<Service> {
         const service = await this.serviceRepository.findOne({ where: { id } });
+        if (!service) {
+            return null;
+        }
         return new Service(service.id, service.name, service.description, service.unit_price, service.category_id);
     }
 

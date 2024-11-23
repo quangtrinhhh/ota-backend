@@ -1,6 +1,7 @@
 export class InvoiceItem {
     id?: number;
     service_id?: number;
+    item_name?: string;
     quantity?: number;
     unit_price?: number;
     total_price?: number;
@@ -9,6 +10,7 @@ export class InvoiceItem {
     constructor(
         id?: number,
         service_id?: number,
+        item_name?: string,
         quantity?: number,
         unit_price?: number,
         total_price?: number,
@@ -16,6 +18,7 @@ export class InvoiceItem {
     ) {
         if (id !== null) this.id = id;
         if (service_id !== null) this.service_id = service_id;
+        if (item_name !== null) this.item_name = item_name;
         if (quantity !== null) this.quantity = quantity;
         if (unit_price !== null) this.unit_price = unit_price;
         if (total_price !== null) {

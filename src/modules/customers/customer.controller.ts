@@ -8,7 +8,7 @@ import { UpdateCustomerDto } from "./dto/updateCustomer.dto";
 
 @Controller('customers')
 export class CustomerController {
-    constructor(private readonly customerService: CustomerService) {}
+    constructor(private readonly customerService: CustomerService) { }
 
     @Get()
     async getCustomers(): Promise<ResponData<Customer[]>> {

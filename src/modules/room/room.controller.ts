@@ -78,6 +78,18 @@ export class roomController {
     }
   }
 
+  @Get('info-roomsWithCustomerToday/:hotel_id')
+  async getRoomsWithCustomerToday(
+    @Param('hotel_id', ParseIntPipe) hotel_id: number
+  ): Promise<ResponData<any>> {
+    try {
+      const rooms = await this.roomService.getRoomsWithCustomerToday(hotel_id);
+      return new ResponData(rooms, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+    } catch (error) {
+      return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
   // Lấy phòng theo ID
   @Get(':id')
   async getOne(@Param('id') id: number): Promise<ResponData<string>> {

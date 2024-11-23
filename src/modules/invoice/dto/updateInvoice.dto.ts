@@ -18,6 +18,12 @@ export class UpdateInvoiceDto {
     discount_percentage: number;
 
     @IsOptional()
+    note_discount: string;
+
+    @IsOptional()
+    note: string;
+    
+    @IsOptional()
     @IsInt()
     customer_id: number;
 

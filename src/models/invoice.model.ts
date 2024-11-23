@@ -4,6 +4,8 @@ export class Invoice {
     total_amount?: number;
     discount_amount?: number;
     discount_percentage?: number;
+    note_discount?: string;
+    note?: string;
     customer_id?: number;
     payment_method?: 'Cash' | 'Credit_card' | 'Bank_transfer';
     status?: 'Paid' | 'Unpaid';
@@ -16,6 +18,8 @@ export class Invoice {
         total_amount: number,
         discount_amount: number,
         discount_percentage: number,
+        note_discount: string,
+        note: string,
         customer_id: number,
         payment_method: 'Cash' | 'Credit_card' | 'Bank_transfer',
         status: 'Paid' | 'Unpaid',
@@ -27,6 +31,8 @@ export class Invoice {
         if (total_amount !== null) this.total_amount = total_amount;
         if (discount_amount !== null) this.discount_amount = discount_amount;
         if (discount_percentage !== null) this.discount_percentage = discount_percentage;
+        if (note_discount !== null) this.note_discount = note_discount;
+        if (note !== null) this.note = note;
         if (customer_id !== null) this.customer_id = customer_id;
         if (payment_method !== null) this.payment_method = payment_method;
         if (status !== null) this.status = status;

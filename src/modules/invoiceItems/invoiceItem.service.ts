@@ -15,24 +15,25 @@ export class InvoiceItemService {
 
     async getInvoiceItems(): Promise<InvoiceItem[]> {
         const invoiceItems = await this.invoiceItemRepository.find();
-        return invoiceItems.map(invoiceItem => new InvoiceItem(invoiceItem.id, invoiceItem.service_id, invoiceItem.quantity, invoiceItem.unit_price, invoiceItem.total_price, invoiceItem.invoice_id));
+        return invoiceItems.map(invoiceItem => new InvoiceItem(invoiceItem.id, invoiceItem.service_id, invoiceItem.item_name, invoiceItem.quantity, invoiceItem.unit_price, invoiceItem.total_price, invoiceItem.invoice_id));
     }
 
     async findOneInvoiceItem(id: number): Promise<InvoiceItem> {
         const invoiceItem = await this.invoiceItemRepository.findOne({ where: { id } });
-        return new InvoiceItem(invoiceItem.id, invoiceItem.service_id, invoiceItem.quantity, invoiceItem.unit_price, invoiceItem.total_price, invoiceItem.invoice_id);
+        return new InvoiceItem(invoiceItem.id, invoiceItem.service_id, invoiceItem.item_name, invoiceItem.quantity, invoiceItem.unit_price, invoiceItem.total_price, invoiceItem.invoice_id);
     }
 
     async createInvoiceItem(createInvoiceItemDto: CreateInvoiceItemDto): Promise<InvoiceItem> {
         const invoiceItem = new InvoiceItem();
         invoiceItem.service_id = createInvoiceItemDto.service_id;
+        invoiceItem.item_name = createInvoiceItemDto.item_name;
         invoiceItem.quantity = createInvoiceItemDto.quantity;
         invoiceItem.unit_price = createInvoiceItemDto.unit_price;
         invoiceItem.total_price = createInvoiceItemDto.total_price;
         invoiceItem.invoice_id = createInvoiceItemDto.invoice_id;
 
         await this.invoiceItemRepository.save(invoiceItem);
-        return new InvoiceItem(invoiceItem.id, invoiceItem.service_id, invoiceItem.quantity, invoiceItem.unit_price, invoiceItem.total_price, invoiceItem.invoice_id);
+        return new InvoiceItem(invoiceItem.id, invoiceItem.service_id, invoiceItem.item_name, invoiceItem.quantity, invoiceItem.unit_price, invoiceItem.total_price, invoiceItem.invoice_id);
 
     }
 
@@ -67,6 +68,7 @@ export class InvoiceItemService {
         return new InvoiceItem(
             invoiceItem.id,
             invoiceItem.service_id,
+            invoiceItem.item_name,
             invoiceItem.quantity,
             invoiceItem.unit_price,
             invoiceItem.total_price,

@@ -15,7 +15,7 @@ export class CustomerService {
 
     async getCustomers(): Promise<Customer[]> {
         const customers = await this.customerRepository.find();
-        return customers.map(customer => new Customer(customer.id, customer.birthday, customer.phone, customer.email, customer.gender, customer.hotel_id));
+        return customers.map(customer => new Customer(customer.id, customer.name, customer.birthday, customer.phone, customer.email, customer.gender, customer.hotel_id));
     }
 
     async createCustomer(createCustomerDto: CreateCustomerDto): Promise<Customer> {
@@ -23,7 +23,7 @@ export class CustomerService {
             ...createCustomerDto,
         });
         await this.customerRepository.save(customer);
-        return new Customer(customer.id, customer.birthday, customer.phone, customer.email, customer.gender, customer.hotel_id);
+        return new Customer(customer.id, customer.name, customer.birthday, customer.phone, customer.email, customer.gender, customer.hotel_id);
     }
 
     async getDetailCustomer(id: number): Promise<Customer> {
@@ -31,13 +31,13 @@ export class CustomerService {
         if (!customer) {
             throw new NotFoundException(`Customer with ID ${id} not found`);
         }
-        return new Customer(customer.id, customer.birthday, customer.phone, customer.email, customer.gender, customer.hotel_id);
+        return new Customer(customer.id, customer.name, customer.birthday, customer.phone, customer.email, customer.gender, customer.hotel_id);
     }
 
     async updateCustomer(id: number, updateCustomerDto: UpdateCustomerDto) {
-        const customer = await this.getDetailCustomer(id); 
-        Object.assign(customer, updateCustomerDto); 
-        await this.customerRepository.save(customer); 
+        const customer = await this.getDetailCustomer(id);
+        Object.assign(customer, updateCustomerDto);
+        await this.customerRepository.save(customer);
         return 'Update success';
     }
 

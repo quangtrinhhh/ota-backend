@@ -14,6 +14,9 @@ export class InvoiceItemEntity extends BaseEntity {
     @Column({ nullable: true })
     service_id: number;
 
+    @Column({ nullable: true })
+    item_name: string;
+
     @Column()
     quantity: number; // Số lượng dịch vụ sử dụng (ví dụ: số ngày phòng hoặc số lần sử dụng dịch vụ)
 

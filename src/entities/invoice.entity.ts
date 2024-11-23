@@ -1,7 +1,9 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { BookingEntity } from "./booking.entity";
 import { HotelEntity } from "./hotel.entity";
 import { CustomerEntity } from "./customer.entity";
+import { ReceiptEntity } from "./receipt.entity";
+import { InvoiceItemEntity } from "./invoiceItems.entity";
 
 @Entity('invoice')
 export class InvoiceEntity extends BaseEntity {
@@ -21,11 +23,17 @@ export class InvoiceEntity extends BaseEntity {
     @Column({ nullable: true, default: 0 })
     discount_percentage: number;  // Giảm giá theo phần trăm
 
+    @Column({ nullable: true })
+    note_discount: string;
+
+    @Column({ nullable: true })
+    note: string;
+
     @ManyToOne(() => CustomerEntity, customer => customer.id)
     @JoinColumn({ name: 'customer_id' })
     customer: CustomerEntity;
 
-    @Column()
+    @Column({ nullable: true })
     customer_id: number;
 
     @Column({
@@ -46,7 +54,7 @@ export class InvoiceEntity extends BaseEntity {
     @JoinColumn({ name: 'booking_id' })
     booking: BookingEntity;
 
-    @Column()
+    @Column({ nullable: true })
     booking_id: number;
 
     @ManyToOne(() => HotelEntity, hotel => hotel.id)
@@ -55,4 +63,10 @@ export class InvoiceEntity extends BaseEntity {
 
     @Column()
     hotel_id: number;
+
+    @OneToMany(() => ReceiptEntity, (receipt) => receipt.invoice)
+    receipts: ReceiptEntity;
+
+    @OneToMany(() => InvoiceItemEntity, (item) => item.invoice)
+    items: InvoiceItemEntity[];
 }

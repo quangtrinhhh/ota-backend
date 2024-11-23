@@ -109,13 +109,15 @@ export class RoomService {
       floor: room.floor?.name,          // Lấy tên tầng
       hotel: room.hotel?.name,
       hotel_id: room.hotel?.id,       // Lấy tên khách sạn
-      bookings: room.booking_rooms.map(bookingRoom => ({
-        id: bookingRoom.booking.id,
-        booking_at: bookingRoom.booking.booking_at,
-        check_in_at: bookingRoom.booking.check_in_at,
-        check_out_at: bookingRoom.booking.check_out_at,
-        status: bookingRoom.booking.status,
-      }))
+      bookings: room.booking_rooms
+        .filter(bookingRoom => bookingRoom.booking.status !== 'Cancelled')
+        .map(bookingRoom => ({
+          id: bookingRoom.booking.id,
+          booking_at: bookingRoom.booking.booking_at,
+          check_in_at: bookingRoom.booking.check_in_at,
+          check_out_at: bookingRoom.booking.check_out_at,
+          status: bookingRoom.booking.status,
+        }))
     }));
   }
 
@@ -151,7 +153,7 @@ export class RoomService {
         // Lọc các booking của phòng, chỉ lấy booking có đặt phòng là hôm nay
         const bookingsToday = room.booking_rooms.filter(bookingRoom => {
           const bookingDate = new Date(bookingRoom.booking.booking_at);
-          return bookingDate >= today && bookingDate < tomorrow;
+          return bookingDate >= today && bookingDate < tomorrow && bookingRoom.booking.status !== 'Cancelled';
         });
 
         // Lọc các booking của phòng, chỉ lấy booking có check_in_at là hôm qua và check_out_at chưa qua hôm nay
@@ -159,8 +161,10 @@ export class RoomService {
           const checkInDate = new Date(bookingRoom.booking.check_in_at);
           const checkOutDate = new Date(bookingRoom.booking.check_out_at);
 
+          checkInDate.setHours(0, 0, 0, 0);
+
           // Kiểm tra check_in_at là sau ngày hôm qua và check_out_at chưa qua hôm nay
-          return checkInDate <= yesterday && checkInDate < today && checkOutDate >= today;
+          return checkInDate <= yesterday && checkInDate < today && checkOutDate >= today && bookingRoom.booking.status !== 'Cancelled';
         });
 
         const roomData = {
@@ -194,4 +198,99 @@ export class RoomService {
     }
   }
 
+  async getRoomsWithCustomerToday(hotel_id: number): Promise<any> {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);  // Đặt giờ thành 00:00:00 để so sánh với ngày hôm nay
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);  // Ngày mai (sử dụng để so sánh với ngày hôm nay)
+
+      // Ngày hôm qua
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);  // Ngày hôm qua
+
+      // Lấy tất cả các phòng cùng với thông tin booking
+      const rooms = await this.roomRepository.find({
+        where: { hotel: { id: hotel_id } },
+        relations: [
+          'room_type',
+          'floor',
+          'hotel',
+          'booking_rooms',
+          'booking_rooms.booking',
+          'booking_rooms.booking.customer',
+          'booking_rooms.booking.invoices',
+        ],
+        order: {
+          name: 'ASC',
+        }
+      });
+
+      const allRooms = [];
+
+      rooms.forEach(room => {
+        // Lọc các booking của phòng, chỉ lấy booking có đặt phòng là hôm nay
+        const bookingsToday = room.booking_rooms.filter(bookingRoom => {
+          const bookingDate = new Date(bookingRoom.booking.booking_at);
+          return bookingDate >= today && bookingDate < tomorrow;
+        });
+
+        // Lọc các booking của phòng, chỉ lấy booking có check_in_at là hôm qua và check_out_at chưa qua hôm nay
+        const bookingsInUse = room.booking_rooms.filter(bookingRoom => {
+          const checkInDate = new Date(bookingRoom.booking.check_in_at);
+          const checkOutDate = new Date(bookingRoom.booking.check_out_at)
+
+          checkInDate.setHours(0, 0, 0, 0);
+
+          // Kiểm tra check_in_at là sau ngày hôm qua và check_out_at chưa qua hôm nay
+          return checkInDate <= yesterday && checkInDate < today && checkOutDate >= today;
+        });
+
+        if ((bookingsInUse.length > 0 || bookingsToday.length > 0)) {
+          const validBookings = [
+            ...bookingsToday,
+            ...bookingsInUse
+          ].filter(bookingRoom => bookingRoom.booking.status !== 'Cancelled');
+
+          if (validBookings.length > 0) {
+            const roomData = {
+              id: room.id,
+              name: room.name,
+              hotel_id: room.hotel?.id,
+              bookings: [...bookingsToday, ...bookingsInUse].map(bookingRoom => ({
+                // id: bookingRoom.booking.id,
+                // booking_at: bookingRoom.booking.booking_at,
+                // check_in_at: bookingRoom.booking.check_in_at,
+                // check_out_at: bookingRoom.booking.check_out_at,
+                // status: bookingRoom.booking.status,
+                customer: {
+                  id: bookingRoom.booking.customer?.id,
+                  name: bookingRoom.booking.customer?.name,
+                  // email: bookingRoom.booking.customer?.email,
+                  // phone: bookingRoom.booking.customer?.phone,
+                },
+                invoice: bookingRoom.booking.invoices && bookingRoom.booking.invoices.length > 0
+                  ? bookingRoom.booking.invoices.map(invoice => ({
+                    id: invoice.id,
+                    // issue_at: invoice.issue_at,
+                    // total_amount: invoice.total_amount,
+                    // discount_amount: invoice.discount_amount,
+                    // discount_percentage: invoice.discount_percentage,
+                    // payment_method: invoice.payment_method,
+                    status: invoice.status,
+                  }))
+                  : null
+              }))
+            };
+            allRooms.push(roomData);
+          }
+        }
+      });
+
+      return allRooms;
+    } catch (error) {
+      console.error('Error fetching room status for today:', error);
+      throw new Error('Unable to fetch room status for today');
+    }
+  }
 }

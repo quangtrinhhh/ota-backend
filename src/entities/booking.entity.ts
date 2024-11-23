@@ -2,6 +2,7 @@ import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, On
 import { CustomerEntity } from "./customer.entity";
 import { HotelEntity } from "./hotel.entity";
 import { BookingRoomEntity } from "./bookingRoom.entity";
+import { InvoiceEntity } from "./invoice.entity";
 
 @Entity('booking')
 export class BookingEntity extends BaseEntity {
@@ -49,4 +50,7 @@ export class BookingEntity extends BaseEntity {
 
     @OneToMany(() => BookingRoomEntity, bookingRoom => bookingRoom.booking)
     booking_rooms: BookingRoomEntity[];
+
+    @OneToMany(() => InvoiceEntity, (invoice) => invoice.booking)
+    invoices: InvoiceEntity[];
 }
