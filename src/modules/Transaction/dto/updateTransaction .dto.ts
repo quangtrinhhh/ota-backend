@@ -33,5 +33,9 @@ export class UpdateTransactionDto {
 
   @IsOptional()
   @IsString()
-  created_at?: Date;    
+  created_at?: Date;
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  user_id?: number;
 }
