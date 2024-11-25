@@ -111,4 +111,8 @@ export class roomController {
     }
   }
 
+  @Get('details/:id') // Endpoint lấy thông tin chi tiết phòng
+  async getRoomDetails(@Param('id') id: number) {
+    return await this.roomService.getRoomDetails(+id);
+  }
 }
