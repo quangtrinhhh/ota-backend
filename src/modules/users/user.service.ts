@@ -213,6 +213,9 @@ export class UserService {
     return shortCode.toString().padStart(6, '0'); // Đảm bảo đủ 6 chữ số
   }
   async getUsersByHotelId(id: number) {
+    if (!id) {
+      throw new Error('User not found');
+    }
     // Tìm user theo `id`
     const user = await this.userRepository.findOne({ where: { id } });
 
