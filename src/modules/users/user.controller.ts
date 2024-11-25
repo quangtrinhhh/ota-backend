@@ -106,13 +106,13 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('/userbyhotel/all')
   async getIdbyHotel(@GetUser() user: any): Promise<any> {
-    const userId = user.id; // Lấy id người dùng từ JWT
+    const userId = user._id; // Lấy id người dùng từ JWT
     try {
       const result = await this.userService.getUsersByHotelId(userId);
       return new ResponData(result, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
     } catch (error) {
       console.error(error); // Log lỗi để tiện theo dõi
-      return new ResponData(null, HttpStatus.ERROR, 'Server Internal Error');
+      return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
 }
