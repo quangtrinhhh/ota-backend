@@ -8,16 +8,18 @@ import { InvoiceItemEntity } from 'src/entities/invoiceItems.entity';
 import { InvoiceItemModule } from '../invoiceItems/invoiceItem.module';
 import { ReceiptModule } from '../receips/receip.module';
 import { ServiceModule } from '../services/service.module';
+import { TransactionModule } from '../Transaction/transaction.module';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([InvoiceEntity, ReceiptEntity]),
-        InvoiceItemModule,
-        ReceiptModule,
-        ServiceModule,
-    ],
-    controllers: [InvoiceController],
-    providers: [InvoiceService],
-    exports: [InvoiceService],
+  imports: [
+    TypeOrmModule.forFeature([InvoiceEntity, ReceiptEntity]),
+    InvoiceItemModule,
+    ReceiptModule,
+    ServiceModule,
+    TransactionModule,
+  ],
+  controllers: [InvoiceController],
+  providers: [InvoiceService],
+  exports: [InvoiceService],
 })
-export class InvoiceModule { }
+export class InvoiceModule {}
