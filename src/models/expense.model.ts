@@ -5,7 +5,7 @@ export class Expense {//Model CHI
     payment_method?: 'Cash' | 'Credit_card' | 'Bank_transfer'; // Phương thức thanh toán
     note?: string; // Ghi chú thêm
     customer_name?: string;
-    created_by?: string;
+    user_id?: number;
     hotel_id?: number;
     category?: 'Room_Payment' | 'Service' | 'Other';
     invoice_id?: number;
@@ -17,7 +17,7 @@ export class Expense {//Model CHI
         payment_method?: 'Cash' | 'Credit_card' | 'Bank_transfer',
         note?: string,
         customer_name?: string,
-        created_by?: string,
+        user_id?: number,
         hotel_id?: number,
         category?: 'Room_Payment' | 'Service' | 'Other',
         invoice_id?: number,
@@ -28,7 +28,7 @@ export class Expense {//Model CHI
         if (payment_method !== null) this.payment_method = payment_method;
         if (note !== null) this.note = note;
         if (customer_name !== null) this.customer_name = customer_name;
-        if (created_by !== null) this.created_by = created_by;
+        if (user_id !== null) this.user_id = user_id;
         if (hotel_id !== null) this.hotel_id = hotel_id;
         if (category !== null) this.category = category;
         if (invoice_id !== null) this.invoice_id = invoice_id;

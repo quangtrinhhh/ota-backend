@@ -16,5 +16,5 @@ export interface RequestPaymentService {
         discount: number;
         note: string;
     };
-    created_by: string;
+    user_id: number;
 }

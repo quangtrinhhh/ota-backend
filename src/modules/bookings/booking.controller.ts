@@ -8,7 +8,7 @@ import { Booking } from 'src/models/booking.model';
 
 @Controller('bookings')
 export class BookingController {
-    constructor(private readonly bookingService: BookingService) {}
+    constructor(private readonly bookingService: BookingService) { }
 
     // Lấy tất cả các booking
     @Get()
@@ -65,6 +65,17 @@ export class BookingController {
             return new ResponData<string>(response, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
             return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+        }
+    }
+
+    // Lấy chi tiết booking theo ID
+    @Get('bookingRoomsWithCustomerByRoomId/:room_id')
+    async getBookingRoomsWithCustomerById(@Param('room_id') room_id: number): Promise<ResponData<Booking>> {
+        try {
+            const booking = await this.bookingService.getbookingRoomsWithCustomerByRoomId(room_id);
+            return new ResponData<Booking>(booking, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+        } catch (error) {
+            return new ResponData<Booking>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
 }

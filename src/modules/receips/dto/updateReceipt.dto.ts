@@ -18,16 +18,16 @@ export class UpdateReceiptDto {
     note: string;
 
     @IsOptional()
-    @IsNotEmpty({ message: 'hotel_id không được để trống' })
-    hotel_id?: number;
-
-    @IsOptional()
     @IsNotEmpty({ message: 'customer_name không được để trống' })
     customer_name?: string;
 
     @IsOptional()
-    @IsNotEmpty({ message: 'created_by không được để trống' })
-    created_by?: string;
+    @IsNotEmpty({ message: 'user_id không được để trống' })
+    user_id?: number;
+
+    @IsOptional()
+    @IsNotEmpty({ message: 'hotel_id không được để trống' })
+    hotel_id?: number;
 
     @IsOptional()
     @IsNotEmpty({ message: 'category không được để trống' })

@@ -23,7 +23,7 @@ export class TransactionService {
     private cashTransactionRepository: Repository<CashTransactionEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-  ) {}
+  ) { }
   //   -------------------------------------------------------------------------------------
   async createTransactionCash(
     dto: CreateTransactionDto,
@@ -79,6 +79,54 @@ export class TransactionService {
       transactionType, // Loại giao dịch (thu/chi)
       paymentType: dto.paymentType, // Loại thanh toán
       user_id: dto.user_id, // Liên kết với người tạo phiếu
+      hotel_id: hotelId, // Liên kết với khách sạn
+      isHandedOver: false, // Chưa bàn giao
+      created_at: dto.created_at,
+    });
+
+    // Lưu phiếu thu vào cơ sở dữ liệu
+    const savedTransaction = await this.transactionRepository.save(transaction);
+
+    // Tạo thông tin giao dịch cho ngân hàng nếu là chuyển khoản
+    if (dto.paymentType === 'bank') {
+      const bankTransaction = this.bankTransactionRepository.create({
+        receiverAccount: dto.receiverAccount, // Số tài khoản người nhận
+        receiverName: dto.receiverName, // Tên người nhận
+        bankAmount: dto.amount, // Số tiền chuyển khoản
+        transaction: savedTransaction, // Liên kết với phiếu thu
+      });
+      await this.bankTransactionRepository.save(bankTransaction);
+    }
+
+    // Tạo thông tin giao dịch tiền mặt nếu là thanh toán bằng tiền mặt
+    if (dto.paymentType === 'cash') {
+      const cashTransaction = this.cashTransactionRepository.create({
+        cashAmount: dto.amount, // Số tiền giao dịch bằng tiền mặt
+        transaction: savedTransaction, // Liên kết với phiếu thu
+      });
+      await this.cashTransactionRepository.save(cashTransaction);
+    }
+
+    return savedTransaction;
+  }
+
+  // Hàm chung cho việc tạo phiếu thu/chi
+  async createTransactionWithHotelId(
+    dto: CreateTransactionDto,
+    userId: number,
+    hotelId: number,
+    transactionType: 'income' | 'expense',
+    code: string,
+  ): Promise<TransactionEntity> {
+    // Tạo đối tượng TransactionEntity
+    const transaction = this.transactionRepository.create({
+      code: code, // Mã phiếu thu
+      content: dto.content, // Nội dung phiếu thu
+      note: dto.note, // Ghi chú
+      amount: dto.amount, // Số tiền thu
+      transactionType, // Loại giao dịch (thu/chi)
+      paymentType: dto.paymentType, // Loại thanh toán
+      user_id: userId, // Liên kết với người tạo phiếu
       hotel_id: hotelId, // Liên kết với khách sạn
       isHandedOver: false, // Chưa bàn giao
       created_at: dto.created_at,

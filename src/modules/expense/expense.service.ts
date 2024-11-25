@@ -16,12 +16,12 @@ export class ExpenseService {
     async getExpenses(): Promise<Expense[]> {
         const expenses = await this.expenseRepository.find();
         return expenses.map(
-            expense => new Expense(expense.id, expense.code, expense.amount, expense.payment_method, expense.note, expense.customer_name, expense.created_by, expense.hotel_id, expense.category, expense.invoice_id));
+            expense => new Expense(expense.id, expense.code, expense.amount, expense.payment_method, expense.note, expense.customer_name, expense.user_id, expense.hotel_id, expense.category, expense.invoice_id));
     }
 
     async findOneExpense(id: number): Promise<Expense> {
         const expense = await this.expenseRepository.findOne({ where: { id } });
-        return new Expense(expense.id, expense.code, expense.amount, expense.payment_method, expense.note, expense.customer_name, expense.created_by, expense.hotel_id, expense.category, expense.invoice_id);
+        return new Expense(expense.id, expense.code, expense.amount, expense.payment_method, expense.note, expense.customer_name, expense.user_id, expense.hotel_id, expense.category, expense.invoice_id);
     }
 
     async createExpense(createExpenseDto: CreateExpenseDto): Promise<Expense> {
@@ -31,13 +31,13 @@ export class ExpenseService {
         expense.payment_method = createExpenseDto.payment_method;
         expense.note = createExpenseDto.note;
         expense.customer_name = createExpenseDto.customer_name;
-        expense.created_by = createExpenseDto.created_by;
+        expense.user_id = createExpenseDto.user_id;
         expense.hotel_id = createExpenseDto.hotel_id;
         expense.category = createExpenseDto.category;
         expense.invoice_id = createExpenseDto.invoice_id;
 
         await this.expenseRepository.save(expense);
-        return new Expense(expense.id, expense.code, expense.amount, expense.payment_method, expense.note, expense.customer_name, expense.created_by, expense.hotel_id, expense.category, expense.invoice_id);
+        return new Expense(expense.id, expense.code, expense.amount, expense.payment_method, expense.note, expense.customer_name, expense.user_id, expense.hotel_id, expense.category, expense.invoice_id);
     }
 
     async updateExpense(updateExpenseDto: UpdateExpenseDto): Promise<Expense> {
@@ -46,7 +46,7 @@ export class ExpenseService {
         await this.expenseRepository.update(id, updateExpenseData);
 
         const expense = await this.expenseRepository.findOne({ where: { id } })
-        return new Expense(expense.id, expense.code, expense.amount, expense.payment_method, expense.note, expense.customer_name, expense.created_by, expense.hotel_id, expense.category, expense.invoice_id);
+        return new Expense(expense.id, expense.code, expense.amount, expense.payment_method, expense.note, expense.customer_name, expense.user_id, expense.hotel_id, expense.category, expense.invoice_id);
     }
 
     async deleteExpense(id: number): Promise<string> {

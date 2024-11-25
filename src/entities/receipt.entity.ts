@@ -1,6 +1,7 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { HotelEntity } from "./hotel.entity";
 import { InvoiceEntity } from "./invoice.entity";
+import { UserEntity } from "./user.entity";
 
 
 @Entity('receipt')
@@ -33,8 +34,12 @@ export class ReceiptEntity extends BaseEntity {
     @Column({ type: "varchar" })
     customer_name: string;
 
-    @Column({ type: "varchar", nullable: false })
-    created_by: string;
+    @ManyToOne(() => UserEntity, (user) => user.id)
+    @JoinColumn({ name: 'user_id' })
+    user: UserEntity;
+
+    @Column()
+    user_id: number;
 
     @ManyToOne(() => HotelEntity, hotel => hotel.id)
     @JoinColumn({ name: 'hotel_id' })

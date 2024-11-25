@@ -16,7 +16,7 @@ export class ReceiptService {
     async getReceipts(): Promise<Receipt[]> {
         const receipts = await this.receiptRepository.find();
         return receipts.map(
-            receipt => new Receipt(receipt.id, receipt.code, receipt.amount, receipt.payment_method, receipt.note, receipt.customer_name, receipt.created_by, receipt.hotel_id, receipt.category, receipt.invoice_id));
+            receipt => new Receipt(receipt.id, receipt.code, receipt.amount, receipt.payment_method, receipt.note, receipt.customer_name, receipt.user_id, receipt.hotel_id, receipt.category, receipt.invoice_id));
     }
 
     async findOneReceipt(id: number): Promise<any> {
@@ -28,7 +28,7 @@ export class ReceiptService {
             payment_method: receipt.payment_method,
             note: receipt.note,
             customer_name: receipt.customer_name,
-            created_by: receipt.created_by,
+            user_id: receipt.user_id,
             hotel_id: receipt.hotel_id,
             category: receipt.category,
             invoice_id: receipt.invoice_id,
@@ -43,13 +43,13 @@ export class ReceiptService {
         receipt.payment_method = createReceiptDto.payment_method;
         receipt.note = createReceiptDto.note;
         receipt.customer_name = createReceiptDto.customer_name;
-        receipt.created_by = createReceiptDto.created_by;
+        receipt.user_id = createReceiptDto.user_id;
         receipt.hotel_id = createReceiptDto.hotel_id;
         receipt.category = createReceiptDto.category;
         receipt.invoice_id = createReceiptDto.invoice_id;
 
         await this.receiptRepository.save(receipt);
-        return new Receipt(receipt.id, receipt.code, receipt.amount, receipt.payment_method, receipt.note, receipt.customer_name, receipt.created_by, receipt.hotel_id, receipt.category, receipt.invoice_id);
+        return new Receipt(receipt.id, receipt.code, receipt.amount, receipt.payment_method, receipt.note, receipt.customer_name, receipt.user_id, receipt.hotel_id, receipt.category, receipt.invoice_id);
     }
 
     async updateReceipt(updateReceiptDto: UpdateReceiptDto): Promise<Receipt> {
@@ -58,7 +58,7 @@ export class ReceiptService {
         await this.receiptRepository.update(id, updateReceiptData);
 
         const receipt = await this.receiptRepository.findOne({ where: { id } })
-        return new Receipt(receipt.id, receipt.code, receipt.amount, receipt.payment_method, receipt.note, receipt.customer_name, receipt.created_by, receipt.hotel_id, receipt.category, receipt.invoice_id);
+        return new Receipt(receipt.id, receipt.code, receipt.amount, receipt.payment_method, receipt.note, receipt.customer_name, receipt.user_id, receipt.hotel_id, receipt.category, receipt.invoice_id);
     }
 
     async deleteReceipt(id: number): Promise<string> {
@@ -67,7 +67,10 @@ export class ReceiptService {
     }
 
     async getReceiptsServiceByHotelId(hotel_id: number): Promise<Receipt[]> {
-        const receipts = await this.receiptRepository.find({ where: { hotel_id, category: 'Service' } });
+        const receipts = await this.receiptRepository.find({
+            relations: ['user'],
+            where: { hotel_id, category: 'Service' }
+        });
         return receipts.map(
             receipt => ({
                 id: receipt.id,
@@ -76,7 +79,7 @@ export class ReceiptService {
                 payment_method: receipt.payment_method,
                 note: receipt.note,
                 customer_name: receipt.customer_name,
-                created_by: receipt.created_by,
+                created_by: receipt.user.user_name,
                 hotel_id: receipt.hotel_id,
                 category: receipt.category,
                 invoice_id: receipt.invoice_id,

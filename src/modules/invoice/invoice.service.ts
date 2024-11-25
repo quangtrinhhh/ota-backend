@@ -12,7 +12,7 @@ import { RequestPaymentService } from './dto/requestPaymentService.dto';
 import { InvoiceItemService } from '../invoiceItems/invoiceItem.service';
 import { ReceiptService } from '../receips/receip.service';
 import { ServiceService } from '../services/service.service';
-import { log } from 'console';
+import { v4 as uuidv4 } from 'uuid';
 import { TransactionService } from '../Transaction/transaction.service';
 import {
   CreateTransactionDto,
@@ -31,7 +31,7 @@ export class InvoiceService {
     @InjectRepository(ReceiptEntity)
     private receiptRepository: Repository<ReceiptEntity>,
     private readonly TransactionService: TransactionService,
-  ) {}
+  ) { }
 
   // Lấy danh sách tất cả hóa đơn
   async getInvoices(): Promise<Invoice[]> {
@@ -119,8 +119,6 @@ export class InvoiceService {
   async createInvoiceService(
     requestPaymentService: RequestPaymentService,
   ): Promise<any> {
-    console.log(requestPaymentService);
-
     const invoice = this.invoiceRepository.create({
       total_amount: requestPaymentService.totalPrice,
       discount_amount:
@@ -150,8 +148,10 @@ export class InvoiceService {
       });
     }
 
+    let shortUuid = uuidv4().split('-')[0].slice(0, 5);
+
     await this.receiptService.createReceipt({
-      code: `PT00${invoice.id}`,
+      code: this.mapPaymentMethod(requestPaymentService.paymentMethod) === 'Cash' ? `PTTM-${shortUuid}` : `PTTG-${shortUuid}`,
       amount: requestPaymentService.totalPrice - invoice.discount_amount,
       payment_method: this.mapPaymentMethod(
         requestPaymentService.paymentMethod,
@@ -161,7 +161,7 @@ export class InvoiceService {
       hotel_id: requestPaymentService.hotel_id,
       category: 'Service',
       invoice_id: invoice.id,
-      created_by: requestPaymentService.created_by,
+      user_id: requestPaymentService.user_id,
     });
     // Gọi createTransactionCash để lưu giao dịch thu chi
     try {
@@ -174,21 +174,24 @@ export class InvoiceService {
         note: requestPaymentService.note,
         transactionType: 'income',
         amount: requestPaymentService.totalPrice - invoice.discount_amount, // Số tiền thanh toán
-        user_id: 2, // ID người tạo
+        user_id: requestPaymentService.user_id, // ID người tạo
         paymentType:
           paymentType === 'Cash' ? PaymentType.CASH : PaymentType.BANK,
         created_at: new Date(), // Ngày tạo (mặc định hiện tại)
       };
       console.log(transactionDto);
-      await this.TransactionService.createTransactionCash(
+      await this.TransactionService.createTransactionWithHotelId(
         transactionDto,
-        2,
+        requestPaymentService.user_id,
+        requestPaymentService.hotel_id,
         'income',
+        this.mapPaymentMethod(requestPaymentService.paymentMethod) === 'Cash' ? `PTTM-${shortUuid}` : `PTTG-${shortUuid}`,
       );
     } catch (error) {
       console.error('Error while creating transaction: lỗi: ', error.message);
       throw new Error('Transaction creation failed lỗi');
     }
+    console.log(requestPaymentService);
 
     return {
       invoice_id: invoice.id,

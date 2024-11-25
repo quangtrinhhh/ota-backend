@@ -1,6 +1,7 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { HotelEntity } from "./hotel.entity";
 import { InvoiceEntity } from "./invoice.entity";
+import { UserEntity } from "./user.entity";
 
 @Entity('expense')
 export class ExpenseEntity extends BaseEntity {
@@ -32,8 +33,12 @@ export class ExpenseEntity extends BaseEntity {
     @Column({ type: "varchar", nullable: false })
     customer_name: string;
 
-    @Column({ type: "varchar", nullable: false })
-    created_by: string;
+    @ManyToOne(() => UserEntity, user => user.id)
+    @JoinColumn({ name: 'user_id' })
+    user: UserEntity;
+
+    @Column()
+    user_id: number;
 
     @ManyToOne(() => HotelEntity, hotel => hotel.id)
     @JoinColumn({ name: 'hotel_id' })
