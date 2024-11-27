@@ -43,6 +43,7 @@ import { ExpenseEntity } from './entities/expense.entity';
 import { ReceiptEntity } from './entities/receipt.entity';
 import { ExpenseModule } from './modules/expense/expense.module';
 import { ReceiptModule } from './modules/receips/receip.module';
+import { FloorModule } from './modules/floor/floor.module';
 
 @Module({
   imports: [
@@ -118,6 +119,7 @@ import { ReceiptModule } from './modules/receips/receip.module';
     ServiceModule,
     ExpenseModule,
     ReceiptModule,
+    FloorModule,
   ],
   controllers: [AppController],
   providers: [
@@ -129,5 +131,5 @@ import { ReceiptModule } from './modules/receips/receip.module';
   ],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
 }
