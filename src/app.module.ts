@@ -44,6 +44,7 @@ import { ReceiptEntity } from './entities/receipt.entity';
 import { ExpenseModule } from './modules/expense/expense.module';
 import { ReceiptModule } from './modules/receips/receip.module';
 import { FloorModule } from './modules/floor/floor.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
 
 @Module({
   imports: [
@@ -120,6 +121,7 @@ import { FloorModule } from './modules/floor/floor.module';
     ExpenseModule,
     ReceiptModule,
     FloorModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [

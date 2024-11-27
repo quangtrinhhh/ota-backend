@@ -144,4 +144,8 @@ export class roomController {
       return new ResponData(null, HttpStatus.ERROR, `Lỗi: ${error.message}`);
     }
   }
+  @Get('details/:id') // Endpoint lấy thông tin chi tiết phòng
+  async getRoomDetails(@Param('id') id: number) {
+    return await this.roomService.getRoomDetails(+id);
+  }
 }

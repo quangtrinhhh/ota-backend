@@ -29,10 +29,10 @@ export class BookingEntity extends BaseEntity {
 
     @Column({
         type: 'enum',
-        enum: ['Booked', 'Cancelled'],
+        enum: ['Booked', 'Cancelled', 'CheckedIn', 'CheckedOut', 'NoShow'],
         default: 'Booked' // Trạng thái mặc định là đã đặt
     })
-    status: 'Booked' | 'Cancelled';
+    status: 'Booked' | 'Cancelled' | 'CheckedIn' | 'CheckedOut' | 'NoShow';
 
     @ManyToOne(() => CustomerEntity, customer => customer.id)
     @JoinColumn({ name: 'customer_id' })

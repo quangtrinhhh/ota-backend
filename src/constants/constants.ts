@@ -28,3 +28,11 @@ export const CURRENCY_TYPES = {
 export const PAYMENT_OPTIONS = {
     PAYMENT_AT_THE_COUNTER: "Thanh toán tại quầy"
 }
+
+export const ROOM_STATUS = {
+    EMPTY: 'Trống',
+    BOOKED: 'Đã đặt',
+    NOT_ARRIVED: 'Chưa đến',
+    OCCUPIED: 'Có khách',
+    NOT_CHECKED_OUT: 'Chưa đi'
+};
