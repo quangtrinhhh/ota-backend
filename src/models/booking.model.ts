@@ -6,7 +6,7 @@ export class Booking {
     children?: number;
     adults?: number;
     total_amount?: number;
-    status?: 'Booked' | 'Cancelled';
+    status?: 'Booked' | 'Cancelled' | 'CheckedIn' | 'CheckedOut' | 'NoShow';
     customer_id?: number;
     hotel_id?: number;
 
@@ -18,7 +18,7 @@ export class Booking {
         children: number,
         adults: number,
         total_amount: number,
-        status: 'Booked' | 'Cancelled',
+        status: 'Booked' | 'Cancelled' | 'CheckedIn' | 'CheckedOut' | 'NoShow',
         customer_id: number,
         hotel_id: number
     ) {

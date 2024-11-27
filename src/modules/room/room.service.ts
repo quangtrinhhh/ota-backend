@@ -132,6 +132,9 @@ export class RoomService {
       const yesterday = new Date(today);
       yesterday.setDate(today.getDate() - 1);  // Ngày hôm qua
 
+      console.log('Today (VN):', today);
+      console.log('Tomorrow (VN):', tomorrow);
+      console.log('Yesterday (VN):', yesterday);
       // Lấy tất cả các phòng cùng với thông tin booking
       const rooms = await this.roomRepository.find({
         where: { hotel: { id: hotel_id } },
@@ -153,7 +156,8 @@ export class RoomService {
         // Lọc các booking của phòng, chỉ lấy booking có đặt phòng là hôm nay
         const bookingsToday = room.booking_rooms.filter(bookingRoom => {
           const bookingDate = new Date(bookingRoom.booking.booking_at);
-          return bookingDate >= today && bookingDate < tomorrow && bookingRoom.booking.status !== 'Cancelled';
+          return bookingDate >= today && bookingDate < tomorrow
+            && bookingRoom.booking.status !== 'Booked';
         });
 
         // Lọc các booking của phòng, chỉ lấy booking có check_in_at là hôm qua và check_out_at chưa qua hôm nay
@@ -164,7 +168,10 @@ export class RoomService {
           checkInDate.setHours(0, 0, 0, 0);
 
           // Kiểm tra check_in_at là sau ngày hôm qua và check_out_at chưa qua hôm nay
-          return checkInDate <= yesterday && checkInDate < today && checkOutDate >= today && bookingRoom.booking.status !== 'Cancelled';
+          return checkInDate <= yesterday && checkInDate < today && checkOutDate >= today
+            && bookingRoom.booking.status !== 'Cancelled'
+            && bookingRoom.booking.status !== 'CheckedOut'
+            && bookingRoom.booking.status !== 'NoShow';
         });
 
         const roomData = {

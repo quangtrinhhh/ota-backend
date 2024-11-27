@@ -43,6 +43,7 @@ import { ExpenseEntity } from './entities/expense.entity';
 import { ReceiptEntity } from './entities/receipt.entity';
 import { ExpenseModule } from './modules/expense/expense.module';
 import { ReceiptModule } from './modules/receips/receip.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
 
 @Module({
   imports: [
@@ -118,6 +119,7 @@ import { ReceiptModule } from './modules/receips/receip.module';
     ServiceModule,
     ExpenseModule,
     ReceiptModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [
