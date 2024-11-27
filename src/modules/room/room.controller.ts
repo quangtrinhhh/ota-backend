@@ -42,7 +42,7 @@ export class roomController {
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body(new ValidationPipe()) dto: CreateRoomDto,
+    @Body(new ValidationPipe()) dto: UpdateRoomDto,
   ): Promise<ResponData<string>> {
     try {
       const room = await this.roomService.updateRoom(id, dto);

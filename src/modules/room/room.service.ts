@@ -4,7 +4,11 @@ import { Between, Not, Repository } from 'typeorm';
 import { CreateRoomDto } from './dto/createRoom.dto';
 import { RoomTypeEntity } from 'src/entities/roomType.entity';
 import { HotelEntity } from 'src/entities/hotel.entity';
-import { ConflictException, HttpException } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  NotFoundException,
+} from '@nestjs/common';
 import { HttpStatus } from 'src/global/globalEnum';
 import { UpdateRoomDto } from './dto/updateRoom.dto';
 import { log } from 'console';
@@ -96,31 +100,49 @@ export class RoomService {
   }
 
   //   update
-  async updateRoom(id: number, updateRoomDto: CreateRoomDto): Promise<any> {
+  async updateRoom(id: number, updateRoomDto: UpdateRoomDto): Promise<any> {
     // Tìm phòng theo ID
+    console.log('Payload received:', updateRoomDto);
+
     const room = await this.roomRepository.findOne({ where: { id } });
     if (!room) {
-      return `Room with ID ${id} not found`;
+      throw new NotFoundException(`Room with ID ${id} not found`);
     }
-    // Kiểm tra xem tên phòng mới có trùng với tên phòng khác không
-    const existingRoom = await this.roomRepository.findOne({
-      where: {
-        name: updateRoomDto.name, // Kiểm tra tên phòng
-        id: Not(id), // Đảm bảo không tìm chính phòng đang cập nhật
-      },
+
+    // Kiểm tra tên phòng mới nếu được truyền
+    if (updateRoomDto.name !== undefined && updateRoomDto.name !== null) {
+      const existingRoom = await this.roomRepository.findOne({
+        where: {
+          name: updateRoomDto.name,
+          id: Not(id), // Đảm bảo không tìm chính phòng đang cập nhật
+        },
+      });
+
+      if (existingRoom) {
+        throw new ConflictException(
+          `Phòng có tên ${updateRoomDto.name} đã tồn tại!`,
+        );
+      }
+      room.name = updateRoomDto.name; // Cập nhật tên phòng
+    }
+
+    // Kiểm tra và gán giá trị mới cho `clean_status`
+    if (updateRoomDto.clean_status !== undefined) {
+      room.clean_status = updateRoomDto.clean_status;
+    }
+
+    // Gán các giá trị khác từ `updateRoomDto` (nếu có)
+    Object.keys(updateRoomDto).forEach((key) => {
+      if (updateRoomDto[key] !== undefined && key !== 'name') {
+        room[key] = updateRoomDto[key];
+      }
     });
 
-    if (existingRoom) {
-      throw new ConflictException(
-        `Phòng có tên ${updateRoomDto.name} đã tồn tại!`,
-      );
-    }
-    // Cập nhật thông tin phòng
-    Object.assign(room, updateRoomDto);
+    // Lưu thông tin cập nhật
     const updatedRoom = await this.roomRepository.save(room);
-
     return updatedRoom;
   }
+
   //   xóa
   async deleteRoom(id: number, user_id: number): Promise<string> {
     try {
