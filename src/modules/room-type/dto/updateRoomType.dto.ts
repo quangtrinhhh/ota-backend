@@ -1,17 +1,51 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, MinLength } from 'class-validator';
+import { IsOptional, IsNumber, IsString } from 'class-validator';
 
 export class UpdateRoomTypeDto {
   @IsOptional()
-  @MinLength(1, { message: 'Name phải nhập ít nhất 1 ký tự.' })
+  @IsString()
+  code?: string;
+
+  @IsOptional()
+  @IsString()
   name?: string;
 
   @IsOptional()
-  @MinLength(1, { message: 'nost phải nhập ít nhất 1 ký tự.' })
+  @IsString()
   notes?: string;
 
   @Type(() => Number)
   @IsOptional()
-  @IsInt({ message: 'hotel_id phải là số nguyên' })
-  hotel_id?: number;
+  @IsNumber()
+  hourlyRate?: number;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  dailyRate?: number;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  overnightRate?: number;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  standardCapacity?: number;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  standardChildren?: number;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  maxCapacity?: number;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  maxChildren?: number;
 }

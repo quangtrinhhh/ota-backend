@@ -43,6 +43,7 @@ import { ExpenseEntity } from './entities/expense.entity';
 import { ReceiptEntity } from './entities/receipt.entity';
 import { ExpenseModule } from './modules/expense/expense.module';
 import { ReceiptModule } from './modules/receips/receip.module';
+import { FloorModule } from './modules/floor/floor.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
 
 @Module({
@@ -119,6 +120,7 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
     ServiceModule,
     ExpenseModule,
     ReceiptModule,
+    FloorModule,
     StatisticsModule,
   ],
   controllers: [AppController],
@@ -131,5 +133,5 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
   ],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
 }
