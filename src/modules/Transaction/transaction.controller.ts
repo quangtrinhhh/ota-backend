@@ -177,24 +177,40 @@ export class TransactionController {
     } catch (error) {}
   }
   //----------------------------------------------
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async deleteTransaction(@Param('id') id: number): Promise<any> {
+  async deleteTransaction(
+    @Param('id') id: number,
+    @GetUser()
+    user: any,
+  ): Promise<any> {
     try {
-      const result = this.TransactionService.deleteTransaction(id);
+      const user_id = user._id;
+      const result = await this.TransactionService.deleteTransaction(
+        id,
+        user_id,
+      );
       return new ResponData(result, HttpStatus.SUCCESS, `Xóa thành công ${id}`);
-    } catch (error) {}
+    } catch (error) {
+      return new ResponData(null, HttpStatus.ERROR, ` ${error.message}`);
+    }
   }
   // -------------------------------------------------
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   async updateTransaction(
     @Param('id') id: number,
     @Body() updateDto: UpdateTransactionDto,
+    @GetUser()
+    user: any,
   ): Promise<any> {
     try {
       try {
+        const user_id = user._id;
         const result = await this.TransactionService.updateTransaction(
           id,
           updateDto,
+          user_id,
         );
         return new ResponData(
           result,
@@ -202,7 +218,9 @@ export class TransactionController {
           `Update thành công id: ${id}`,
         );
       } catch (error) {}
-    } catch (error) {}
+    } catch (error) {
+      return new ResponData(null, HttpStatus.ERROR, error.message);
+    }
   }
   //--------------------------------------------------
   // lấy 1 thông tin

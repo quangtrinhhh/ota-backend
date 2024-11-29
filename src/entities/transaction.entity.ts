@@ -72,4 +72,12 @@ export class TransactionEntity extends BaseEntity {
     (cashTransaction) => cashTransaction.transaction,
   )
   cashTransaction: CashTransactionEntity;
+
+  // **Trường status mới**
+  @Column({
+    type: 'enum',
+    enum: ['active', 'cancelled'], // Trạng thái có thể là 'active' hoặc 'cancelled'
+    default: 'active',
+  })
+  status: 'active' | 'cancelled'; // Mặc định là 'active'
 }

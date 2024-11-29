@@ -241,4 +241,75 @@ export class InvoiceService {
     };
     return formattedInvoice;
   }
+
+  async getInvoiceById(invoice_id: number): Promise<any> {
+    // Tìm hóa đơn liên kết với booking
+    const invoice = await this.invoiceRepository.findOne({
+      where: { id: invoice_id },
+      relations: [
+        'booking', // Liên kết với Booking
+        'booking.booking_rooms', // Liên kết với BookingRoom
+        'booking.booking_rooms.room', // Liên kết với Room
+        'booking.booking_rooms.room.room_type', // Loại phòng
+        'booking.booking_rooms.room.floor', // Tầng
+        'booking.booking_rooms.room.hotel', // Khách sạn
+        'booking.customer', // Thông tin khách hàng
+      ],
+    });
+  
+    if (!invoice) {
+      throw new Error('Invoice not found'); // Xử lý nếu không tìm thấy invoice
+    }
+  
+    // Lấy thông tin phòng từ BookingRoom
+    const bookingRooms = invoice.booking.booking_rooms || [];
+    const rooms = bookingRooms.map((bookingRoom) => {
+      const room = bookingRoom.room;
+      return {
+        id: room.id,
+        name: room.name,
+        clean_status: room.clean_status,
+        status: room.status,
+        price: room.price,
+        room_type: room.room_type?.name || null, // Loại phòng
+        floor: room.floor?.name || null, // Tầng
+        hotel: {
+          id: room.hotel?.id || null,
+          name: room.hotel?.name || null, // Thông tin khách sạn
+        },
+      };
+    });
+  
+    // Trả về dữ liệu phòng và các thông tin khác
+    return {
+      invoice: {
+        id: invoice.id,
+        total: invoice.total_amount,
+        status: invoice.status,
+        discount_amount: invoice.discount_amount,
+        discount_percentage: invoice.discount_percentage,
+        booking_at: invoice.booking?.booking_at || null,
+        check_in_at: invoice.booking?.check_in_at || null,
+        check_out_at: invoice.booking?.check_out_at || null,
+        note_discount: invoice.note_discount,
+        note: invoice.note,
+      },
+      customer: {
+        id: invoice.booking?.customer?.id || null,
+        name: invoice.booking?.customer?.name || null,
+        phone: invoice.booking?.customer?.phone || null,
+        email: invoice.booking?.customer?.email || null,
+      },
+      rooms: rooms,
+      bookings: {
+        id: invoice.booking?.id || null,
+        // booking_at: invoice.booking?.booking_at || null,
+        // check_in_at: invoice.booking?.check_in_at || null,
+        // check_out_at: invoice.booking?.check_out_at || null,
+        // children: invoice.booking?.children || null,
+        // adults: invoice.booking?.adults || null,
+        // status: invoice.booking?.status || null,
+        total: invoice.booking?.total_amount || null,
+      },
+    };
 }

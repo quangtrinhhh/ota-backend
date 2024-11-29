@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,7 +24,7 @@ export class TransactionService {
     private cashTransactionRepository: Repository<CashTransactionEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-  ) { }
+  ) {}
   //   -------------------------------------------------------------------------------------
   async createTransactionCash(
     dto: CreateTransactionDto,
@@ -191,7 +192,9 @@ export class TransactionService {
       .where('transaction.hotel_id = :hotelId', { hotelId })
       .andWhere('transaction.paymentType = :paymentType', {
         paymentType: type,
-      });
+      })
+      .andWhere('transaction.status = :status', { status: 'active' })
+      .orderBy('transaction.created_at', 'DESC');
 
     // Áp dụng bộ lọc thời gian nếu có
     this.applyDateFilters(query, fromDate, toDate); // Truyền từ và đến ngày vào bộ lọc
@@ -237,87 +240,118 @@ export class TransactionService {
   }
 
   ///---------------------------------------------------------------------------
-  async deleteTransaction(id: number): Promise<string> {
-    // Tìm phiếu theo ID
-    const transaction = await this.transactionRepository.findOne({
-      where: { id },
-      relations: ['bankTransaction', 'cashTransaction'], // Quan hệ với giao dịch phụ thuộc
-    });
+  async deleteTransaction(id: number, user_id: number): Promise<any> {
+    try {
+      // Tìm phiếu theo ID
+      const hotelId = await this.getHotelIdByUser(user_id);
+      const transaction = await this.transactionRepository.findOne({
+        where: { id },
+        relations: ['bankTransaction', 'cashTransaction'], // Quan hệ với giao dịch phụ thuộc
+      });
 
-    if (!transaction) {
-      throw new NotFoundException(`Transaction with ID ${id} not found`);
+      if (!transaction) {
+        // Ném NotFoundException khi không tìm thấy giao dịch
+        throw new NotFoundException(`Transaction with ID ${id} not found`);
+      }
+      if (transaction.user_id != user_id) {
+        throw new Error(`Đây không phải là phiếu của bạn tạo`);
+      }
+      if (transaction.hotel_id != hotelId) {
+        throw new Error(`Đây không phải là phiếu của hotel`);
+      }
+
+      // Xóa các giao dịch phụ thuộc nếu có
+      if (transaction.bankTransaction) {
+        await this.bankTransactionRepository.delete({ transaction: { id } });
+      }
+      if (transaction.cashTransaction) {
+        await this.cashTransactionRepository.delete({ transaction: { id } });
+      }
+
+      // Xóa phiếu chính
+      await this.transactionRepository.delete(id);
+
+      return {
+        data: `Transaction with ID ${id} has been deleted successfully`,
+        statusCode: 200,
+        message: `Xóa thành công ${id}`, // Phản hồi thành công
+      };
+    } catch (error) {
+      throw error;
     }
-
-    // Xóa các giao dịch phụ thuộc nếu có
-    if (transaction.bankTransaction) {
-      await this.bankTransactionRepository.delete({ transaction: { id } });
-    }
-    if (transaction.cashTransaction) {
-      await this.cashTransactionRepository.delete({ transaction: { id } });
-    }
-
-    // Xóa phiếu chính
-    await this.transactionRepository.delete(id);
-
-    return `Transaction with ID ${id} has been deleted successfully`;
   }
   //----------------------------------------------------------------------------
   async updateTransaction(
     id: number,
     updateDto: UpdateTransactionDto,
+    user_id: number,
   ): Promise<TransactionEntity> {
-    const transaction = await this.transactionRepository.findOne({
-      where: { id },
-      relations: ['bankTransaction', 'cashTransaction'],
-    });
-
-    if (!transaction) {
-      throw new NotFoundException(`Transaction with ID ${id} not found`);
-    }
-
-    // Ngăn chặn thay đổi transactionType và paymentType
-    if (updateDto['transactionType'] || updateDto['paymentType']) {
-      throw new BadRequestException(
-        'Updating transactionType or paymentType is not allowed',
-      );
-    }
-
-    // Cập nhật các trường khác
-    Object.assign(transaction, {
-      content: updateDto.content ?? transaction.content,
-      note: updateDto.note ?? transaction.note,
-      amount: updateDto.amount ?? transaction.amount,
-      created_at: updateDto.created_at ?? transaction.created_at,
-      user_id: updateDto.user_id ?? transaction.user_id,
-    });
-
-    const updatedTransaction =
-      await this.transactionRepository.save(transaction);
-
-    if (transaction.paymentType === 'bank') {
-      if (transaction.bankTransaction) {
-        Object.assign(transaction.bankTransaction, {
-          receiverAccount:
-            updateDto.receiverAccount ??
-            transaction.bankTransaction.receiverAccount,
-          receiverName:
-            updateDto.receiverName ?? transaction.bankTransaction.receiverName,
-          bankAmount:
-            updateDto.amount ?? transaction.bankTransaction.bankAmount,
-        });
-        await this.bankTransactionRepository.save(transaction.bankTransaction);
+    try {
+      const transaction = await this.transactionRepository.findOne({
+        where: { id },
+        relations: ['bankTransaction', 'cashTransaction'],
+      });
+      if (transaction.user_id != user_id) {
+        throw new Error(`Đây không phải là phiếu của bạn tạo`);
       }
-    } else if (transaction.paymentType === 'cash') {
-      if (transaction.cashTransaction) {
-        Object.assign(transaction.cashTransaction, {
-          cashAmount:
-            updateDto.amount ?? transaction.cashTransaction.cashAmount,
-        });
-        await this.cashTransactionRepository.save(transaction.cashTransaction);
+      if (!transaction) {
+        throw new NotFoundException(
+          `Transaction with ID ${transaction.code} not found`,
+        );
       }
-    }
 
-    return updatedTransaction;
+      // Ngăn chặn thay đổi transactionType và paymentType
+      if (updateDto['transactionType'] || updateDto['paymentType']) {
+        throw new BadRequestException(
+          'Updating transactionType or paymentType is not allowed',
+        );
+      }
+
+      // Cập nhật các trường khác
+      Object.assign(transaction, {
+        content: updateDto.content ?? transaction.content,
+        note: updateDto.note ?? transaction.note,
+        amount: updateDto.amount ?? transaction.amount,
+        created_at: updateDto.created_at ?? transaction.created_at,
+        user_id: updateDto.user_id ?? transaction.user_id,
+        status: updateDto.status ?? transaction.status,
+      });
+
+      const updatedTransaction =
+        await this.transactionRepository.save(transaction);
+
+      if (transaction.paymentType === 'bank') {
+        if (transaction.bankTransaction) {
+          Object.assign(transaction.bankTransaction, {
+            receiverAccount:
+              updateDto.receiverAccount ??
+              transaction.bankTransaction.receiverAccount,
+            receiverName:
+              updateDto.receiverName ??
+              transaction.bankTransaction.receiverName,
+            bankAmount:
+              updateDto.amount ?? transaction.bankTransaction.bankAmount,
+          });
+          await this.bankTransactionRepository.save(
+            transaction.bankTransaction,
+          );
+        }
+      } else if (transaction.paymentType === 'cash') {
+        if (transaction.cashTransaction) {
+          Object.assign(transaction.cashTransaction, {
+            cashAmount:
+              updateDto.amount ?? transaction.cashTransaction.cashAmount,
+          });
+          await this.cashTransactionRepository.save(
+            transaction.cashTransaction,
+          );
+        }
+      }
+
+      return updatedTransaction;
+    } catch (error) {
+      throw new error();
+    }
   }
   //-----------------------------------------------------------------------------
   async getTransactionDetailsById(id: number): Promise<any> {
@@ -448,7 +482,8 @@ export class TransactionService {
       .where('transaction.hotel_id = :hotelId', { hotelId })
       .andWhere('transaction.paymentType = :paymentType', {
         paymentType: 'cash',
-      });
+      })
+      .orderBy('transaction.created_at', 'DESC');
 
     // Áp dụng bộ lọc theo loại giao dịch nếu có
     if (type) {
@@ -496,7 +531,8 @@ export class TransactionService {
       .where('transaction.hotel_id = :hotelId', { hotelId })
       .andWhere('transaction.paymentType = :paymentType', {
         paymentType: 'bank',
-      });
+      })
+      .orderBy('transaction.created_at', 'DESC');
 
     // Áp dụng bộ lọc theo loại giao dịch nếu có
     if (type) {
@@ -521,6 +557,7 @@ export class TransactionService {
       date: transaction.created_at, // Ngày tạo giao dịch
       receiverAccount: transaction.bankTransaction?.receiverAccount || null, // Số tài khoản người nhận
       receiverName: transaction.bankTransaction?.receiverName || null, // Tên người nhận
+      status: transaction.status,
     }));
 
     // Trả về kết quả
