@@ -256,11 +256,11 @@ export class InvoiceService {
         'booking.customer', // Thông tin khách hàng
       ],
     });
-  
+
     if (!invoice) {
       throw new Error('Invoice not found'); // Xử lý nếu không tìm thấy invoice
     }
-  
+
     // Lấy thông tin phòng từ BookingRoom
     const bookingRooms = invoice.booking.booking_rooms || [];
     const rooms = bookingRooms.map((bookingRoom) => {
@@ -279,7 +279,7 @@ export class InvoiceService {
         },
       };
     });
-  
+
     // Trả về dữ liệu phòng và các thông tin khác
     return {
       invoice: {
@@ -312,4 +312,5 @@ export class InvoiceService {
         total: invoice.booking?.total_amount || null,
       },
     };
+  }
 }

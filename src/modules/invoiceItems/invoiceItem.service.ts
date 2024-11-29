@@ -5,12 +5,15 @@ import { CreateInvoiceItemDto } from "./dto/createInvoiceItem.dto";
 import { UpdateInvoiceItemDto } from "./dto/updateInvoiceItem.dto";
 import { InvoiceItemEntity } from "src/entities/invoiceItems.entity";
 import { InvoiceItem } from "src/models/invoiceItem.model";
+import { ServiceService } from "../services/service.service";
+import { CreateInvoiceItemsDto } from "./dto/createInvoiceItems.dto";
 
 @Injectable()
 export class InvoiceItemService {
     constructor(
         @InjectRepository(InvoiceItemEntity)
-        private readonly invoiceItemRepository: Repository<InvoiceItemEntity>
+        private readonly invoiceItemRepository: Repository<InvoiceItemEntity>,
+        private readonly serviceService: ServiceService
     ) { }
 
     async getInvoiceItems(): Promise<InvoiceItem[]> {
@@ -80,4 +83,31 @@ export class InvoiceItemService {
         await this.invoiceItemRepository.delete(id);
         return `Delete invoiceItem ${id} success`;
     }
+
+    async createInvoiceItems(createInvoiceItemsDto: CreateInvoiceItemsDto[], invoice_id: number): Promise<string> {
+        createInvoiceItemsDto.map(async dto => {
+            const service = await this.serviceService.findOneService(dto.id);
+            const invoiceItem = new InvoiceItem();
+            invoiceItem.service_id = service ? dto.id : null;
+            invoiceItem.item_name = dto.name;
+            invoiceItem.quantity = dto.quantity;
+            invoiceItem.unit_price = dto.unit_price;
+            invoiceItem.total_price = dto.quantity * dto.unit_price;
+            invoiceItem.invoice_id = invoice_id;
+
+            await this.invoiceItemRepository.save(invoiceItem);
+        });
+
+        return 'Created success';
+    }
+
+    async getInvoiceItemsById(invoice_id: number): Promise<InvoiceItem[]> {
+        const invoiceItems = this.invoiceItemRepository.find({
+            where: { invoice_id },
+            relations: ['service']
+        });
+
+        return invoiceItems;
+    }
+
 }
