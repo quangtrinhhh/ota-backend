@@ -473,11 +473,20 @@ export class RoomService {
     const room = await this.roomRepository.findOne({
       where: { id: room_id }, // Lọc theo `room_id`
       relations: [
+
+        'room_type',            // Liên kết với RoomType
+        'floor',                // Liên kết với Floor
+        'hotel',                // Liên kết với Hotel
+        'booking_rooms',        // Liên kết với BookingRoom
+        'booking_rooms.booking', // Liên kết với BookingEntity để lấy thông tin đặt phòng
+        'booking_rooms.booking.customer', // Liên kết với Customer để lấy thông tin khách hàng
+
         'room_type', // Liên kết với RoomType
         'floor', // Liên kết với Floor
         'hotel', // Liên kết với Hotel
         'booking_rooms', // Liên kết với BookingRoom
         'booking_rooms.booking', // Liên kết với BookingEntity để lấy thông tin đặt phòng
+
       ],
     });
 
@@ -508,6 +517,17 @@ export class RoomService {
           children: bookingRoom.booking.children,
           adults: bookingRoom.booking.adults,
           status: bookingRoom.booking.status,
+          customer: bookingRoom.booking.customer
+            ? {
+                id: bookingRoom.booking.customer.id,
+                name: bookingRoom.booking.customer.name || null,
+                phone: bookingRoom.booking.customer.phone || null,
+                email: bookingRoom.booking.customer.email || null,
+                gender: bookingRoom.booking.customer.gender || null,
+                birthday: bookingRoom.booking.customer.birthday || null,
+                hotel_id: bookingRoom.booking.customer.hotel_id || null,
+              }
+            : null, // Trường hợp không có thông tin khách hàng
         })),
     };
   }
