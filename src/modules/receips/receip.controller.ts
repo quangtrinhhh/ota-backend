@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, ValidationPipe } from "@nestjs/common";
 import { ReceiptService } from "./receip.service";
 import { HttpMessage, HttpStatus } from "src/global/globalEnum";
 import { ResponData } from "src/global/globalClass";
 import { CreateReceiptDto } from "./dto/createReceipt.dto";
 import { UpdateReceiptDto } from "./dto/updateReceipt.dto";
 import { Receipt } from "src/models/receipt.model";
+
 @Controller('receipt')
 export class ReceiptController {
     constructor(private readonly receipService: ReceiptService) { }
@@ -18,10 +19,22 @@ export class ReceiptController {
         }
     }
 
-    @Get('receiptServiceByHotelId/:hotel_id')
-    async getReceiptsByHotelId(@Param('hotel_id') hotel_id: number): Promise<ResponData<Receipt[]>> {
+    @Get('receiptServiceByHotelId')
+    async getReceiptsByHotelId(
+        @Query('hotel_id') hotel_id: number,
+        @Query('currentPage') currentPage: number,
+        @Query('pageSize') pageSize: number = 10,
+        @Query('startDate') startDate: string,
+        @Query('endDate') endDate: string,
+    ): Promise<ResponData<Receipt[]>> {
         try {
-            return new ResponData<Receipt[]>(await this.receipService.getReceiptsServiceByHotelId(hotel_id), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+            return new ResponData<Receipt[]>(await this.receipService.getReceiptsServiceByHotelId(
+                hotel_id,
+                currentPage,
+                pageSize,
+                startDate,
+                endDate,
+            ), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
             return new ResponData<Receipt[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }

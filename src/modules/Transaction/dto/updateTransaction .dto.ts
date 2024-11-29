@@ -38,4 +38,7 @@ export class UpdateTransactionDto {
   @Type(() => Number)
   @IsNumber()
   user_id?: number;
+
+  @IsOptional()
+  status: string;
 }
