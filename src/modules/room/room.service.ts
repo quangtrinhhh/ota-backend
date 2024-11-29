@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { RoomEntity } from 'src/entities/room.entity';
+import { RoomEntity, RoomStatus } from 'src/entities/room.entity';
 import { Between, Not, Repository } from 'typeorm';
 import { CreateRoomDto } from './dto/createRoom.dto';
 import { RoomTypeEntity } from 'src/entities/roomType.entity';
@@ -32,7 +32,7 @@ export class RoomService {
     private floorRepository: Repository<FloorEntity>,
     @InjectRepository(BookingRoomEntity)
     private readonly bookingRoomRepository: Repository<BookingRoomEntity>,
-  ) { }
+  ) {}
   //tạo phòng
   async createRoom(dto: CreateRoomDto, user_id: number): Promise<any> {
     const { name, price, room_type_id, floor_id, notes, start_date_use } = dto;
@@ -305,18 +305,23 @@ export class RoomService {
             console.log('bookingDate' + bookingDate);
             console.log(today);
           }
-          return bookingDate.getTime() === today.getTime()
-            && bookingRoom.booking.status === 'Booked'
+          return (
+            bookingDate.getTime() === today.getTime() &&
+            bookingRoom.booking.status === 'Booked'
+          );
         });
 
         // Lọc các booking của phòng, chỉ lấy booking có check_in_at là hôm qua và check_out_at chưa qua hôm nay
-        const bookingsInUse = room.booking_rooms.filter(bookingRoom => {
+        const bookingsInUse = room.booking_rooms.filter((bookingRoom) => {
           const checkInDate = new Date(bookingRoom.booking.check_in_at);
           const checkOutDate = new Date(bookingRoom.booking.check_out_at);
           checkInDate.setHours(0, 0, 0, 0);
 
-          return checkInDate <= today && checkOutDate > today
-            && bookingRoom.booking.status === 'CheckedIn';
+          return (
+            checkInDate <= today &&
+            checkOutDate > today &&
+            bookingRoom.booking.status === 'CheckedIn'
+          );
         });
 
         const roomData = {
@@ -332,19 +337,19 @@ export class RoomService {
           bookings:
             bookingsToday.length > 0 || bookingsInUse.length > 0
               ? [...bookingsToday, ...bookingsInUse].map((bookingRoom) => ({
-                id: bookingRoom.booking.id,
-                booking_at: bookingRoom.booking.booking_at,
-                check_in_at: bookingRoom.booking.check_in_at,
-                check_out_at: bookingRoom.booking.check_out_at,
-                status: bookingRoom.booking.status,
-                children: bookingRoom.booking.children,
-                adults: bookingRoom.booking.adults,
-                customer: {
-                  id: bookingRoom.booking.customer?.id,
-                  name: bookingRoom.booking.customer?.name,
-                },
-                invoice_id: bookingRoom.booking.invoices[0]?.id
-              }))
+                  id: bookingRoom.booking.id,
+                  booking_at: bookingRoom.booking.booking_at,
+                  check_in_at: bookingRoom.booking.check_in_at,
+                  check_out_at: bookingRoom.booking.check_out_at,
+                  status: bookingRoom.booking.status,
+                  children: bookingRoom.booking.children,
+                  adults: bookingRoom.booking.adults,
+                  customer: {
+                    id: bookingRoom.booking.customer?.id,
+                    name: bookingRoom.booking.customer?.name,
+                  },
+                  invoice_id: bookingRoom.booking.invoices[0]?.id,
+                }))
               : null,
         };
 
@@ -435,16 +440,16 @@ export class RoomService {
                   },
                   invoice:
                     bookingRoom.booking.invoices &&
-                      bookingRoom.booking.invoices.length > 0
+                    bookingRoom.booking.invoices.length > 0
                       ? bookingRoom.booking.invoices.map((invoice) => ({
-                        id: invoice.id,
-                        // issue_at: invoice.issue_at,
-                        // total_amount: invoice.total_amount,
-                        // discount_amount: invoice.discount_amount,
-                        // discount_percentage: invoice.discount_percentage,
-                        // payment_method: invoice.payment_method,
-                        status: invoice.status,
-                      }))
+                          id: invoice.id,
+                          // issue_at: invoice.issue_at,
+                          // total_amount: invoice.total_amount,
+                          // discount_amount: invoice.discount_amount,
+                          // discount_percentage: invoice.discount_percentage,
+                          // payment_method: invoice.payment_method,
+                          status: invoice.status,
+                        }))
                       : null,
                 }),
               ),
@@ -477,9 +482,9 @@ export class RoomService {
     const room = await this.roomRepository.findOne({
       where: { id: room_id }, // Lọc theo `room_id`
       relations: [
-        'floor',                // Liên kết với Floor
-        'hotel',                // Liên kết với Hotel
-        'booking_rooms',        // Liên kết với BookingRoom
+        'floor', // Liên kết với Floor
+        'hotel', // Liên kết với Hotel
+        'booking_rooms', // Liên kết với BookingRoom
         'booking_rooms.booking', // Liên kết với BookingEntity để lấy thông tin đặt phòng
         'booking_rooms.booking.customer', // Liên kết với Customer để lấy thông tin khách hàng
         'booking_rooms.booking', // Liên kết với BookingEntity để lấy thông tin đặt phòng
@@ -493,11 +498,11 @@ export class RoomService {
         'booking_rooms.booking.invoices', // Liên kết với BookingEntity để lấy thông tin đặt phòng
       ],
     });
-  
+
     if (!room) {
       throw new Error('Room not found'); // Xử lý nếu không tìm thấy phòng
     }
-  
+
     // Xử lý dữ liệu trả về
     return {
       id: room.id,
@@ -506,14 +511,14 @@ export class RoomService {
       status: room.status,
       price: room.price,
       room_type: room.room_type?.name || null, // Tên loại phòng (nếu có)
-      floor: room.floor?.name || null,         // Tên tầng (nếu có)
+      floor: room.floor?.name || null, // Tên tầng (nếu có)
       hotel: {
         id: room.hotel?.id || null,
-        name: room.hotel?.name || null,       // Thông tin khách sạn (nếu có)
+        name: room.hotel?.name || null, // Thông tin khách sạn (nếu có)
       },
       bookings: room.booking_rooms
-        .filter(bookingRoom => bookingRoom.booking.status !== 'Cancelled') // Loại bỏ các booking bị hủy
-        .map(bookingRoom => ({
+        .filter((bookingRoom) => bookingRoom.booking.status !== 'Cancelled') // Loại bỏ các booking bị hủy
+        .map((bookingRoom) => ({
           id: bookingRoom.booking.id,
           booking_at: bookingRoom.booking.booking_at,
           check_in_at: bookingRoom.booking.check_in_at,
@@ -535,7 +540,6 @@ export class RoomService {
         })),
     };
   }
-
 
   async getAllRoomsInusedToday(hotel_id: number): Promise<any> {
     try {
@@ -577,18 +581,23 @@ export class RoomService {
             console.log('bookingDate' + bookingDate);
             console.log(today);
           }
-          return bookingDate.getTime() === today.getTime()
-            && bookingRoom.booking.status === 'Booked'
+          return (
+            bookingDate.getTime() === today.getTime() &&
+            bookingRoom.booking.status === 'Booked'
+          );
         });
 
         // Lọc các booking của phòng, chỉ lấy booking có check_in_at là hôm qua và check_out_at chưa qua hôm nay
-        const bookingsInUse = room.booking_rooms.filter(bookingRoom => {
+        const bookingsInUse = room.booking_rooms.filter((bookingRoom) => {
           const checkInDate = new Date(bookingRoom.booking.check_in_at);
           const checkOutDate = new Date(bookingRoom.booking.check_out_at);
           checkInDate.setHours(0, 0, 0, 0);
 
-          return checkInDate <= today && checkOutDate > today
-            && bookingRoom.booking.status === 'CheckedIn';
+          return (
+            checkInDate <= today &&
+            checkOutDate > today &&
+            bookingRoom.booking.status === 'CheckedIn'
+          );
         });
 
         if (bookingsToday.length > 0 || bookingsInUse.length > 0) {
@@ -605,19 +614,19 @@ export class RoomService {
             bookings:
               bookingsToday.length > 0 || bookingsInUse.length > 0
                 ? [...bookingsToday, ...bookingsInUse].map((bookingRoom) => ({
-                  id: bookingRoom.booking.id,
-                  booking_at: bookingRoom.booking.booking_at,
-                  check_in_at: bookingRoom.booking.check_in_at,
-                  check_out_at: bookingRoom.booking.check_out_at,
-                  status: bookingRoom.booking.status,
-                  children: bookingRoom.booking.children,
-                  adults: bookingRoom.booking.adults,
-                  customer: {
-                    id: bookingRoom.booking.customer?.id,
-                    name: bookingRoom.booking.customer?.name,
-                  },
-                  invoice_id: bookingRoom.booking.invoices[0]?.id
-                }))
+                    id: bookingRoom.booking.id,
+                    booking_at: bookingRoom.booking.booking_at,
+                    check_in_at: bookingRoom.booking.check_in_at,
+                    check_out_at: bookingRoom.booking.check_out_at,
+                    status: bookingRoom.booking.status,
+                    children: bookingRoom.booking.children,
+                    adults: bookingRoom.booking.adults,
+                    customer: {
+                      id: bookingRoom.booking.customer?.id,
+                      name: bookingRoom.booking.customer?.name,
+                    },
+                    invoice_id: bookingRoom.booking.invoices[0]?.id,
+                  }))
                 : null,
           };
 
@@ -630,5 +639,38 @@ export class RoomService {
       console.error('Error fetching room status for today:', error);
       throw new Error('Unable to fetch room status for today');
     }
+  }
+
+  async getRoomStatistics(user_id: number) {
+    const hotelId = await this.getHotelIdByUser(user_id);
+    console.log(hotelId);
+    
+    const totalRooms = await this.roomRepository.count({
+      where: { hotel_id: hotelId },
+    });
+    console.log("totalRooms",totalRooms);
+    const emptyRooms = await this.roomRepository.count({
+      where: { hotel_id: hotelId, status: RoomStatus.EMPTY },
+    });
+
+    const bookedRooms = await this.roomRepository.count({
+      where: { hotel_id: hotelId, status: RoomStatus.BOOKED },
+    });
+
+    const occupiedRooms = await this.roomRepository.count({
+      where: { hotel_id: hotelId, status: RoomStatus.OCCUPIED },
+    });
+
+    const notCheckedOutRooms = await this.roomRepository.count({
+      where: { hotel_id: hotelId, status: RoomStatus.NOT_CHECKED_OUT },
+    });
+
+    return {
+      totalRooms,
+      emptyRooms,
+      bookedRooms,
+      occupiedRooms,
+      notCheckedOutRooms,
+    };
   }
 }

@@ -8,6 +8,8 @@ import { FloorEntity } from 'src/entities/floor.entity';
 import { Repository } from 'typeorm';
 import { CreateFloorDto } from './dto/CreateFloor.dto';
 import { UserEntity } from 'src/entities/user.entity';
+import { UpdateFloorDto } from './dto/UpdateFloor.dto';
+import { RoomEntity } from 'src/entities/room.entity';
 
 @Injectable()
 export class FloorService {
@@ -16,6 +18,8 @@ export class FloorService {
     private floorRepository: Repository<FloorEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(RoomEntity)
+    private roomRepository: Repository<RoomEntity>,
   ) {}
 
   async createFloor(dto: CreateFloorDto, user_id: number) {
@@ -77,7 +81,71 @@ export class FloorService {
       throw error;
     }
   }
+  // Hàm lấy một floor theo ID
+  async getFloorById(id: number, user_id: number): Promise<any> {
+    const hotelId = await this.getHotelIdByUser(user_id);
+    const floor = await this.floorRepository.findOne({
+      where: { id, hotel_id: hotelId }, // Tìm floor theo ID
+      relations: ['hotel'], // Nếu muốn lấy thông tin hotel liên quan, thêm quan hệ này
+    });
 
+    if (!floor) {
+      throw new Error(`Floor with ID ${id} not found`);
+    }
+
+    return {
+      id: floor.id,
+      name: floor.name,
+      floor_id: floor.level,
+      note: floor.note,
+    };
+  }
+  // Hàm update một floor
+  async updateFloor(
+    id: number,
+    updateFloorDto: UpdateFloorDto,
+  ): Promise<FloorEntity> {
+    const floor = await this.floorRepository.findOne({ where: { id } });
+
+    if (!floor) {
+      throw new Error(`Floor with ID ${id} not found`);
+    }
+
+    // Cập nhật các trường còn lại từ updateFloorDto
+    Object.assign(floor, updateFloorDto);
+
+    // Kiểm tra giá trị hợp lệ của floor_id trước khi cập nhật level
+    if (
+      updateFloorDto.floor_id !== undefined &&
+      !isNaN(updateFloorDto.floor_id)
+    ) {
+      floor.level = updateFloorDto.floor_id;
+    } else {
+      // Nếu floor_id không hợp lệ, có thể bỏ qua hoặc gán giá trị mặc định
+      console.error('Invalid floor_id:', updateFloorDto.floor_id);
+    }
+
+    // Lưu lại đối tượng floor đã được cập nhật
+    return this.floorRepository.save(floor);
+  }
+
+  // Hàm xóa một floor
+  async deleteFloor(id: number): Promise<any> {
+    const floor = await this.floorRepository.findOne({ where: { id } });
+    // Kiểm tra xem có phòng nào còn liên kết với tầng không
+    const rooms = await this.roomRepository.find({ where: { floor_id: id } });
+
+    if (rooms.length > 0) {
+      throw new Error(`Không thể xóa tầng vì còn phòng liên kết.`);
+    }
+    if (!floor) {
+      throw new Error(`Floor with ID ${id} not found`);
+    }
+
+    await this.floorRepository.remove(floor); // Xóa floor
+
+    return `Xóa thành công ${floor.name}`;
+  }
   /**
    *
    * @param userId
