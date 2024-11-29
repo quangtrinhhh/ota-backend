@@ -473,18 +473,19 @@ export class RoomService {
     const room = await this.roomRepository.findOne({
       where: { id: room_id }, // Lọc theo `room_id`
       relations: [
-        'room_type', // Liên kết với RoomType
-        'floor', // Liên kết với Floor
-        'hotel', // Liên kết với Hotel
-        'booking_rooms', // Liên kết với BookingRoom
+        'room_type',            // Liên kết với RoomType
+        'floor',                // Liên kết với Floor
+        'hotel',                // Liên kết với Hotel
+        'booking_rooms',        // Liên kết với BookingRoom
         'booking_rooms.booking', // Liên kết với BookingEntity để lấy thông tin đặt phòng
+        'booking_rooms.booking.customer', // Liên kết với Customer để lấy thông tin khách hàng
       ],
     });
-
+  
     if (!room) {
       throw new Error('Room not found'); // Xử lý nếu không tìm thấy phòng
     }
-
+  
     // Xử lý dữ liệu trả về
     return {
       id: room.id,
@@ -493,14 +494,14 @@ export class RoomService {
       status: room.status,
       price: room.price,
       room_type: room.room_type?.name || null, // Tên loại phòng (nếu có)
-      floor: room.floor?.name || null, // Tên tầng (nếu có)
+      floor: room.floor?.name || null,         // Tên tầng (nếu có)
       hotel: {
         id: room.hotel?.id || null,
-        name: room.hotel?.name || null, // Thông tin khách sạn (nếu có)
+        name: room.hotel?.name || null,       // Thông tin khách sạn (nếu có)
       },
       bookings: room.booking_rooms
-        .filter((bookingRoom) => bookingRoom.booking.status !== 'Cancelled') // Loại bỏ các booking bị hủy
-        .map((bookingRoom) => ({
+        .filter(bookingRoom => bookingRoom.booking.status !== 'Cancelled') // Loại bỏ các booking bị hủy
+        .map(bookingRoom => ({
           id: bookingRoom.booking.id,
           booking_at: bookingRoom.booking.booking_at,
           check_in_at: bookingRoom.booking.check_in_at,
@@ -508,6 +509,17 @@ export class RoomService {
           children: bookingRoom.booking.children,
           adults: bookingRoom.booking.adults,
           status: bookingRoom.booking.status,
+          customer: bookingRoom.booking.customer
+            ? {
+                id: bookingRoom.booking.customer.id,
+                name: bookingRoom.booking.customer.name || null,
+                phone: bookingRoom.booking.customer.phone || null,
+                email: bookingRoom.booking.customer.email || null,
+                gender: bookingRoom.booking.customer.gender || null,
+                birthday: bookingRoom.booking.customer.birthday || null,
+                hotel_id: bookingRoom.booking.customer.hotel_id || null,
+              }
+            : null, // Trường hợp không có thông tin khách hàng
         })),
     };
   }
