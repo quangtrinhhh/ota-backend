@@ -312,5 +312,4 @@ export class InvoiceService {
         total: invoice.booking?.total_amount || null,
       },
     };
-  }    
 }
