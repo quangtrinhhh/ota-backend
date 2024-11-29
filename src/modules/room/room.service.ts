@@ -473,12 +473,19 @@ export class RoomService {
     const room = await this.roomRepository.findOne({
       where: { id: room_id }, // Lọc theo `room_id`
       relations: [
-        'room_type',            // Liên kết với RoomType
         'floor',                // Liên kết với Floor
         'hotel',                // Liên kết với Hotel
         'booking_rooms',        // Liên kết với BookingRoom
         'booking_rooms.booking', // Liên kết với BookingEntity để lấy thông tin đặt phòng
         'booking_rooms.booking.customer', // Liên kết với Customer để lấy thông tin khách hàng
+        'booking_rooms.booking', // Liên kết với BookingEntity để lấy thông tin đặt phòng
+        'booking_rooms.booking.customer', // Liên kết với Customer để lấy thông tin khách hàng
+
+        'room_type', // Liên kết với RoomType
+        'floor', // Liên kết với Floor
+        'hotel', // Liên kết với Hotel
+        'booking_rooms', // Liên kết với BookingRoom
+        'booking_rooms.booking', // Liên kết với BookingEntity để lấy thông tin đặt phòng
       ],
     });
   
