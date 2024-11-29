@@ -22,7 +22,7 @@ import { dot } from 'node:test/reporters';
 
 @Controller('room')
 export class roomController {
-  constructor(private readonly roomService: RoomService) {}
+  constructor(private readonly roomService: RoomService) { }
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(
@@ -87,6 +87,19 @@ export class roomController {
     try {
       const rooms =
         await this.roomService.getAllRoomsWithBookingsToday(hotel_id);
+      return new ResponData(rooms, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+    } catch (error) {
+      return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
+  @Get('info-roomInusedToday/:hotel_id')
+  async getAllRoomsInusedToday(
+    @Param('hotel_id', ParseIntPipe) hotel_id: number,
+  ): Promise<ResponData<any>> {
+    try {
+      const rooms =
+        await this.roomService.getAllRoomsInusedToday(hotel_id);
       return new ResponData(rooms, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
     } catch (error) {
       return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);

@@ -36,3 +36,10 @@ export const ROOM_STATUS = {
     OCCUPIED: 'Có khách',
     NOT_CHECKED_OUT: 'Chưa đi'
 };
+
+export const TAB_GENERA_INFOMATION = {
+    WILL_ARRIVE: 'Sẽ đến',
+    WILL_DEPART: 'Sẽ đi',
+    OVERDUE_ARRIVE: 'Quá hạn sẽ đến',
+    CURRENT_GUEST: 'Khách đang ở',
+}
