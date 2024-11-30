@@ -25,6 +25,10 @@ export class UpdateInvoiceItemDto {
     total_price: number;
 
     @IsOptional()
+    @IsNotEmpty({ message: 'category không được để trống' })
+    category: 'Booking' | 'Service' | 'Other';
+
+    @IsOptional()
     @IsNotEmpty({ message: 'invoice_id không được để trống' })
     invoice_id: number;
 }

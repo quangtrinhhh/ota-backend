@@ -5,6 +5,7 @@ export class InvoiceItem {
     quantity?: number;
     unit_price?: number;
     total_price?: number;
+    category?: 'Booking' | 'Service' | 'Other';
     invoice_id?: number;
 
     constructor(
@@ -14,6 +15,7 @@ export class InvoiceItem {
         quantity?: number,
         unit_price?: number,
         total_price?: number,
+        category?: 'Booking' | 'Service' | 'Other',
         invoice_id?: number
     ) {
         if (id !== null) this.id = id;
@@ -26,6 +28,7 @@ export class InvoiceItem {
         } else if (quantity !== null && unit_price !== null) {
             this.total_price = quantity * unit_price; // Tính toán nếu không được cung cấp
         }
+        if (category !== null) this.category = category;
         if (invoice_id !== null) this.invoice_id = invoice_id;
     }
 }

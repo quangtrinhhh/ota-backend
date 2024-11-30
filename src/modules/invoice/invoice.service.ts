@@ -140,10 +140,11 @@ export class InvoiceService {
 
       await this.invoiceItemService.createInvoiceItem({
         service_id: serviceExists ? item.id : null,
-        item_name: serviceExists ? null : item.name,
+        item_name: item.name,
         quantity: item.quantity,
         unit_price: item.unit_price,
         total_price: item.unit_price * item.quantity,
+        category: 'Service',
         invoice_id: invoice.id,
       });
     }
@@ -331,17 +332,17 @@ export class InvoiceService {
         'items.service.category',  // Liên kết với Category
       ],
     });
-  
+
     if (!invoice) {
       throw new Error('Invoice not found');
     }
-  
+
     // Lấy thông tin booking
     const booking = invoice.booking;
     if (!booking) {
       throw new Error('Booking not found for this invoice');
     }
-  
+
     // Xử lý danh sách phòng liên quan đến booking
     const rooms = booking.booking_rooms.map(bookingRoom => {
       const room = bookingRoom.room;
@@ -358,7 +359,7 @@ export class InvoiceService {
           : null, // Nếu không có hotel, trả về null
       };
     });
-  
+
     // Trả về dữ liệu đầy đủ
     return {
       invoice: {
@@ -381,19 +382,16 @@ export class InvoiceService {
         status: booking.status,
         customer: booking.customer
           ? {
-              id: booking.customer.id,
-              name: booking.customer.name || null,
-              phone: booking.customer.phone || null,
-              email: booking.customer.email || null,
-              gender: booking.customer.gender || null,
-              birthday: booking.customer.birthday || null,
-            }
+            id: booking.customer.id,
+            name: booking.customer.name || null,
+            phone: booking.customer.phone || null,
+            email: booking.customer.email || null,
+            gender: booking.customer.gender || null,
+            birthday: booking.customer.birthday || null,
+          }
           : null,
       },
       rooms,
     };
   }
-  
-    
-}
 }

@@ -26,6 +26,14 @@ export class InvoiceItemEntity extends BaseEntity {
     @Column()
     total_price: number;// Tổng giá trị dịch vụ (tính toán từ quantity * unit_price)
 
+    @Column({
+        type: 'enum',
+        enum: ['Booking', 'Service', 'Other'], // Các loại hóa đơn
+        default: 'Other', // Giá trị mặc định là 'Other'
+    })
+    category: 'Booking' | 'Service' | 'Other';
+
+
     @ManyToOne(() => InvoiceEntity, invoice => invoice.id)
     @JoinColumn({ name: 'invoice_id' })
     invoice: InvoiceEntity;
