@@ -93,6 +93,18 @@ export class roomController {
     }
   }
 
+  @Get('info-roomInusedToday/:hotel_id')
+  async getAllRoomsInusedToday(
+    @Param('hotel_id', ParseIntPipe) hotel_id: number,
+  ): Promise<ResponData<any>> {
+    try {
+      const rooms = await this.roomService.getAllRoomsInusedToday(hotel_id);
+      return new ResponData(rooms, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+    } catch (error) {
+      return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
   @Get('info-roomsWithCustomerToday/:hotel_id')
   async getRoomsWithCustomerToday(
     @Param('hotel_id', ParseIntPipe) hotel_id: number,
@@ -147,5 +159,25 @@ export class roomController {
   @Get('details/:id') // Endpoint lấy thông tin chi tiết phòng
   async getRoomDetails(@Param('id') id: number) {
     return await this.roomService.getRoomDetails(+id);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Get('/statistics/toalroom')
+  async getRoomStatistics(
+    @GetUser()
+    user: any,
+  ) {
+    try {
+      const user_id = user._id;
+
+      const roomStatistics = await this.roomService.getRoomStatistics(user_id);
+      console.log('roomStatistics', roomStatistics);
+      return new ResponData(
+        roomStatistics,
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
+    } catch (error) {
+      return new ResponData(null, HttpStatus.ERROR, error.message);
+    }
   }
 }
