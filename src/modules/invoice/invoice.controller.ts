@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, ValidationPipe, NotFoundException } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, ValidationPipe, NotFoundException, ParseIntPipe } from "@nestjs/common";
 import { ResponData } from "src/global/globalClass";
 import { HttpMessage, HttpStatus } from "src/global/globalEnum";
 import { InvoiceService } from "./invoice.service";
@@ -89,6 +89,37 @@ export class InvoiceController {
 
     @Get('invoiceById/:invoice_id')
     async getInvoiceById(@Param('invoice_id') invoice_id: number) {
+      try {
+        // Gọi service để lấy chi tiết invoice theo invoice_id
+        const invoiceDetails = await this.invoiceService.getInvoiceById(invoice_id);
+  
+        // Nếu không tìm thấy hóa đơn, có thể ném ra lỗi NotFoundException
+        if (!invoiceDetails) {
+          throw new NotFoundException(`Invoice with id ${invoice_id} not found`);
+        }
+  
+        // Trả về dữ liệu từ service
+        return { data: invoiceDetails };
+      } catch (error) {
+        // Nếu có lỗi khác, sẽ xử lý và trả về lỗi với thông báo phù hợp
+        throw new NotFoundException('Invoice not found or error occurred');
+      }
+    }
+    
+
+    @Get('room-details/:id')
+  async getInvoiceRoomDetails(@Param('id', ParseIntPipe) invoiceId: number) {
+    try {
+      const roomDetails = await this.invoiceService.getRoomDetailsByInvoice(invoiceId);
+      return {
+        success: true,
+        data: roomDetails,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Something went wrong.',
+      };
         try {
             // Gọi service để lấy chi tiết invoice theo invoice_id
             const invoiceDetails = await this.invoiceService.getInvoiceById(invoice_id);
