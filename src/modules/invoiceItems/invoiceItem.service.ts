@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CreateInvoiceItemDto } from "./dto/createInvoiceItem.dto";
@@ -7,13 +7,17 @@ import { InvoiceItemEntity } from "src/entities/invoiceItems.entity";
 import { InvoiceItem } from "src/models/invoiceItem.model";
 import { ServiceService } from "../services/service.service";
 import { CreateInvoiceItemsDto } from "./dto/createInvoiceItems.dto";
+import { InvoiceService } from "../invoice/invoice.service";
 
 @Injectable()
 export class InvoiceItemService {
     constructor(
         @InjectRepository(InvoiceItemEntity)
         private readonly invoiceItemRepository: Repository<InvoiceItemEntity>,
-        private readonly serviceService: ServiceService
+        private readonly serviceService: ServiceService,
+
+        @Inject(forwardRef(() => InvoiceService))  // Sử dụng forwardRef để giải quyết vòng lặp phụ thuộc
+        private readonly invoiceService: InvoiceService,
     ) { }
 
     async getInvoiceItems(): Promise<InvoiceItem[]> {
@@ -87,7 +91,7 @@ export class InvoiceItemService {
     }
 
     async createInvoiceItems(createInvoiceItemsDto: CreateInvoiceItemsDto[], invoice_id: number): Promise<string> {
-        createInvoiceItemsDto.map(async dto => {
+        for (const dto of createInvoiceItemsDto) {
             const service = await this.serviceService.findOneService(dto.id);
             const invoiceItem = new InvoiceItem();
             invoiceItem.service_id = service ? dto.id : null;
@@ -99,15 +103,32 @@ export class InvoiceItemService {
             invoiceItem.invoice_id = invoice_id;
 
             await this.invoiceItemRepository.save(invoiceItem);
-        });
+        }
+
+        await this.invoiceService.updateInvoiceTotalAmount(invoice_id);
 
         return 'Created success';
     }
 
-    async getInvoiceItemsById(invoice_id: number): Promise<InvoiceItem[]> {
+    async getInvoiceItemsServiceByInvoiceId(invoice_id: number): Promise<InvoiceItem[]> {
+        const invoiceItems = this.invoiceItemRepository.find({
+            where: { invoice_id, category: 'Service' },
+            relations: ['service']
+        });
+
+        return invoiceItems;
+    }
+
+    async getInvoiceItemBookingByInvoiceId(invoice_id: number): Promise<InvoiceItem> {
+        const invoiceItem = this.invoiceItemRepository.findOne({
+            where: { invoice_id, category: 'Booking' },
+        });
+        return invoiceItem;
+    }
+
+    async getInvoiceItemsByInvoiceId(invoice_id: number): Promise<InvoiceItem[]> {
         const invoiceItems = this.invoiceItemRepository.find({
             where: { invoice_id },
-            relations: ['service']
         });
 
         return invoiceItems;

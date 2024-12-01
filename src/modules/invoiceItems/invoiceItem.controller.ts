@@ -20,12 +20,21 @@ export class InvoiceItemController {
         }
     }
 
-    @Get('invoiceItemsById/:invoice_id')
-    async getInvoiceItemsById(@Param('invoice_id') invoice_id: number): Promise<ResponData<InvoiceItem[]>> {
+    @Get('invoiceItemsServiceInvoiceId/:invoice_id')
+    async getInvoiceItemsServiceByInvoiceId(@Param('invoice_id') invoice_id: number): Promise<ResponData<InvoiceItem[]>> {
         try {
-            return new ResponData<InvoiceItem[]>(await this.invoiceItemService.getInvoiceItemsById(invoice_id), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+            return new ResponData<InvoiceItem[]>(await this.invoiceItemService.getInvoiceItemsServiceByInvoiceId(invoice_id), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
             return new ResponData<InvoiceItem[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+        }
+    }
+
+    @Get('invoiceItemBookingInvoiceId/:invoice_id')
+    async getInvoiceItemBookingByInvoiceId(@Param('invoice_id') invoice_id: number): Promise<ResponData<InvoiceItem>> {
+        try {
+            return new ResponData<InvoiceItem>(await this.invoiceItemService.getInvoiceItemBookingByInvoiceId(invoice_id), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+        } catch (error) {
+            return new ResponData<InvoiceItem>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
 

@@ -394,4 +394,14 @@ export class InvoiceService {
       rooms,
     };
   }
+
+  async updateInvoiceTotalAmount(invoice_id: number): Promise<any> {
+    const invoiceItems = await this.invoiceItemService.getInvoiceItemsByInvoiceId(invoice_id);
+
+    const countTotalAmount = invoiceItems.reduce((total, item) => {
+      return total + item.total_price;
+    }, 0);
+
+    await this.invoiceRepository.update(invoice_id, { total_amount: countTotalAmount });
+  }
 }

@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn, BeforeInsert, BeforeUpdate } from "typeorm";
+import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn, BeforeInsert, BeforeUpdate, CreateDateColumn } from "typeorm";
 import { InvoiceEntity } from "./invoice.entity";
 import { ServiceEntity } from "./service.entity";
 
@@ -33,6 +33,8 @@ export class InvoiceItemEntity extends BaseEntity {
     })
     category: 'Booking' | 'Service' | 'Other';
 
+    @CreateDateColumn()
+    createdAt: Date;
 
     @ManyToOne(() => InvoiceEntity, invoice => invoice.id)
     @JoinColumn({ name: 'invoice_id' })

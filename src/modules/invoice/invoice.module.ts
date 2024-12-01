@@ -22,4 +22,4 @@ import { TransactionModule } from '../Transaction/transaction.module';
   providers: [InvoiceService],
   exports: [InvoiceService],
 })
-export class InvoiceModule {}
+export class InvoiceModule { }
