@@ -54,4 +54,10 @@ export class InvoicePaymentController {
             return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
+
+    @Get('id/:invoice_id')
+    async getAllInvoicePayments(@Param('invoice_id') invoice_id: number) {
+        return await this.invoicePaymentService.getAllInvoicePaymentByInvoiceId(invoice_id);
+    }
+
 }

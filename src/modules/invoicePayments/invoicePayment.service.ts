@@ -5,12 +5,15 @@ import { CreateInvoicePaymentDto } from "./dto/createInvoicePayment.dto";
 import { UpdateInvoicePaymentDto } from "./dto/updateInvoicePayment.dto";
 import { InvoicePaymentEntity } from "src/entities/invoicePayments.entity";
 import { InvoicePayment } from "src/models/invoicePayment.model";
+import { InvoiceService } from "../invoice/invoice.service";
 
 @Injectable()
 export class InvoicePaymentService {
     constructor(
         @InjectRepository(InvoicePaymentEntity)
-        private readonly invoicePaymentRepository: Repository<InvoicePaymentEntity>
+        private readonly invoicePaymentRepository: Repository<InvoicePaymentEntity>,
+
+        private readonly invoiceService: InvoiceService,
     ) { }
 
     async getInvoicePayments(): Promise<InvoicePayment[]> {
@@ -47,4 +50,23 @@ export class InvoicePaymentService {
         await this.invoicePaymentRepository.delete(id);
         return `Delete invoicePayment ${id} success`;
     }
+
+    async getAllInvoicePaymentByInvoiceId(invoice_id: number): Promise<any> {
+        const invoice = await this.invoiceService.getInvoiceById(invoice_id);
+    
+        const invoicePayments = await this.invoicePaymentRepository.find({
+          where: { invoice_id },
+        });
+    
+        return {
+          invoice,
+          payments: invoicePayments.map((payment) => ({
+            id: payment.id,
+            payment_date: payment.payment_date,
+            amount: payment.amount,
+            payment_method: payment.payment_method,
+            note: payment.note,
+          })),
+        };
+      }
 }
