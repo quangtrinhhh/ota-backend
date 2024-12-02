@@ -32,7 +32,7 @@ export class RoomService {
     private floorRepository: Repository<FloorEntity>,
     @InjectRepository(BookingRoomEntity)
     private readonly bookingRoomRepository: Repository<BookingRoomEntity>,
-  ) {}
+  ) { }
   //tạo phòng
   async createRoom(dto: CreateRoomDto, user_id: number): Promise<any> {
     const { name, price, room_type_id, floor_id, notes, start_date_use } = dto;
@@ -301,10 +301,6 @@ export class RoomService {
           const bookingDate = new Date(bookingRoom.booking.booking_at);
           bookingDate.setHours(0, 0, 0, 0);
 
-          if (bookingDate === today) {
-            console.log('bookingDate' + bookingDate);
-            console.log(today);
-          }
           return (
             bookingDate.getTime() === today.getTime() &&
             bookingRoom.booking.status === 'Booked'
@@ -337,19 +333,19 @@ export class RoomService {
           bookings:
             bookingsToday.length > 0 || bookingsInUse.length > 0
               ? [...bookingsToday, ...bookingsInUse].map((bookingRoom) => ({
-                  id: bookingRoom.booking.id,
-                  booking_at: bookingRoom.booking.booking_at,
-                  check_in_at: bookingRoom.booking.check_in_at,
-                  check_out_at: bookingRoom.booking.check_out_at,
-                  status: bookingRoom.booking.status,
-                  children: bookingRoom.booking.children,
-                  adults: bookingRoom.booking.adults,
-                  customer: {
-                    id: bookingRoom.booking.customer?.id,
-                    name: bookingRoom.booking.customer?.name,
-                  },
-                  invoice_id: bookingRoom.booking.invoices[0]?.id,
-                }))
+                id: bookingRoom.booking.id,
+                booking_at: bookingRoom.booking.booking_at,
+                check_in_at: bookingRoom.booking.check_in_at,
+                check_out_at: bookingRoom.booking.check_out_at,
+                status: bookingRoom.booking.status,
+                children: bookingRoom.booking.children,
+                adults: bookingRoom.booking.adults,
+                customer: {
+                  id: bookingRoom.booking.customer?.id,
+                  name: bookingRoom.booking.customer?.name,
+                },
+                invoice_id: bookingRoom.booking.invoices[0]?.id,
+              }))
               : null,
         };
 
@@ -397,7 +393,10 @@ export class RoomService {
         // Lọc các booking của phòng, chỉ lấy booking có đặt phòng là hôm nay
         const bookingsToday = room.booking_rooms.filter((bookingRoom) => {
           const bookingDate = new Date(bookingRoom.booking.booking_at);
-          return bookingDate >= today && bookingDate < tomorrow;
+          bookingDate.setHours(0, 0, 0, 0);
+
+          return bookingDate.getTime() === today.getTime() &&
+            bookingRoom.booking.status === 'Booked';
         });
 
         // Lọc các booking của phòng, chỉ lấy booking có check_in_at là hôm qua và check_out_at chưa qua hôm nay
@@ -409,9 +408,9 @@ export class RoomService {
 
           // Kiểm tra check_in_at là sau ngày hôm qua và check_out_at chưa qua hôm nay
           return (
-            checkInDate <= yesterday &&
-            checkInDate < today &&
-            checkOutDate >= today
+            checkInDate <= today &&
+            checkOutDate > today &&
+            bookingRoom.booking.status === 'CheckedIn'
           );
         });
 
@@ -428,9 +427,9 @@ export class RoomService {
               bookings: [...bookingsToday, ...bookingsInUse].map(
                 (bookingRoom) => ({
                   // id: bookingRoom.booking.id,
-                  // booking_at: bookingRoom.booking.booking_at,
-                  // check_in_at: bookingRoom.booking.check_in_at,
-                  // check_out_at: bookingRoom.booking.check_out_at,
+                  booking_at: bookingRoom.booking.booking_at,
+                  check_in_at: bookingRoom.booking.check_in_at,
+                  check_out_at: bookingRoom.booking.check_out_at,
                   // status: bookingRoom.booking.status,
                   customer: {
                     id: bookingRoom.booking.customer?.id,
@@ -440,16 +439,16 @@ export class RoomService {
                   },
                   invoice:
                     bookingRoom.booking.invoices &&
-                    bookingRoom.booking.invoices.length > 0
+                      bookingRoom.booking.invoices.length > 0
                       ? bookingRoom.booking.invoices.map((invoice) => ({
-                          id: invoice.id,
-                          // issue_at: invoice.issue_at,
-                          // total_amount: invoice.total_amount,
-                          // discount_amount: invoice.discount_amount,
-                          // discount_percentage: invoice.discount_percentage,
-                          // payment_method: invoice.payment_method,
-                          status: invoice.status,
-                        }))
+                        id: invoice.id,
+                        // issue_at: invoice.issue_at,
+                        // total_amount: invoice.total_amount,
+                        // discount_amount: invoice.discount_amount,
+                        // discount_percentage: invoice.discount_percentage,
+                        // payment_method: invoice.payment_method,
+                        status: invoice.status,
+                      }))
                       : null,
                 }),
               ),
@@ -528,14 +527,14 @@ export class RoomService {
           status: bookingRoom.booking.status,
           customer: bookingRoom.booking.customer
             ? {
-                id: bookingRoom.booking.customer.id,
-                name: bookingRoom.booking.customer.name || null,
-                phone: bookingRoom.booking.customer.phone || null,
-                email: bookingRoom.booking.customer.email || null,
-                gender: bookingRoom.booking.customer.gender || null,
-                birthday: bookingRoom.booking.customer.birthday || null,
-                hotel_id: bookingRoom.booking.customer.hotel_id || null,
-              }
+              id: bookingRoom.booking.customer.id,
+              name: bookingRoom.booking.customer.name || null,
+              phone: bookingRoom.booking.customer.phone || null,
+              email: bookingRoom.booking.customer.email || null,
+              gender: bookingRoom.booking.customer.gender || null,
+              birthday: bookingRoom.booking.customer.birthday || null,
+              hotel_id: bookingRoom.booking.customer.hotel_id || null,
+            }
             : null, // Trường hợp không có thông tin khách hàng
         })),
     };
@@ -614,19 +613,19 @@ export class RoomService {
             bookings:
               bookingsToday.length > 0 || bookingsInUse.length > 0
                 ? [...bookingsToday, ...bookingsInUse].map((bookingRoom) => ({
-                    id: bookingRoom.booking.id,
-                    booking_at: bookingRoom.booking.booking_at,
-                    check_in_at: bookingRoom.booking.check_in_at,
-                    check_out_at: bookingRoom.booking.check_out_at,
-                    status: bookingRoom.booking.status,
-                    children: bookingRoom.booking.children,
-                    adults: bookingRoom.booking.adults,
-                    customer: {
-                      id: bookingRoom.booking.customer?.id,
-                      name: bookingRoom.booking.customer?.name,
-                    },
-                    invoice_id: bookingRoom.booking.invoices[0]?.id,
-                  }))
+                  id: bookingRoom.booking.id,
+                  booking_at: bookingRoom.booking.booking_at,
+                  check_in_at: bookingRoom.booking.check_in_at,
+                  check_out_at: bookingRoom.booking.check_out_at,
+                  status: bookingRoom.booking.status,
+                  children: bookingRoom.booking.children,
+                  adults: bookingRoom.booking.adults,
+                  customer: {
+                    id: bookingRoom.booking.customer?.id,
+                    name: bookingRoom.booking.customer?.name,
+                  },
+                  invoice_id: bookingRoom.booking.invoices[0]?.id,
+                }))
                 : null,
           };
 
@@ -644,11 +643,11 @@ export class RoomService {
   async getRoomStatistics(user_id: number) {
     const hotelId = await this.getHotelIdByUser(user_id);
     console.log(hotelId);
-    
+
     const totalRooms = await this.roomRepository.count({
       where: { hotel_id: hotelId },
     });
-    console.log("totalRooms",totalRooms);
+    console.log("totalRooms", totalRooms);
     const emptyRooms = await this.roomRepository.count({
       where: { hotel_id: hotelId, status: RoomStatus.EMPTY },
     });

@@ -41,8 +41,7 @@ export class BookingService {
     async updateBooking(id: number, updateBookingDto: UpdateBookingDto) {
         const booking = await this.getBookingById(id); // Kiểm tra xem booking có tồn tại không
         Object.assign(booking, updateBookingDto); // Cập nhật các trường mới
-        await this.bookingRepository.save(booking); // Lưu thay đổi
-        return 'Update success';
+        return await this.bookingRepository.save(booking);
     }
 
     // Xóa booking theo ID

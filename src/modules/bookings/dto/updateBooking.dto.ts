@@ -26,8 +26,8 @@ export class UpdateBookingDto {
     total_amount?: number;
 
     @IsOptional()
-    @IsEnum(['Booked', 'Cancelled'])
-    status?: 'Booked' | 'Cancelled';
+    @IsEnum(['Booked', 'Cancelled', 'CheckedIn', 'CheckedOut', 'NoShow'])
+    status: 'Booked' | 'Cancelled' | 'CheckedIn' | 'CheckedOut' | 'NoShow';
 
     @IsOptional()
     @IsInt()

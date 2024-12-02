@@ -19,8 +19,8 @@ export class CreateBookingDto {
     @IsInt()
     total_amount: number;
 
-    @IsEnum(['Booked', 'Cancelled'])
-    status: 'Booked' | 'Cancelled';
+    @IsEnum(['Booked' , 'Cancelled' , 'CheckedIn' , 'CheckedOut' , 'NoShow'])
+    status: 'Booked' | 'Cancelled' | 'CheckedIn' | 'CheckedOut' | 'NoShow';
 
     @IsInt()
     customer_id: number;
