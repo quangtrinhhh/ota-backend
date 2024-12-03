@@ -1,30 +1,59 @@
-import { IsDateString, IsInt, IsEnum } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsDateString,
+  IsInt,
+  IsEnum,
+  IsArray,
+  ArrayNotEmpty,
+  IsNotEmpty,
+  IsPositive,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateBookingDto {
-    @IsDateString()
-    booking_at: Date;
 
-    @IsDateString()
-    check_in_at: Date;
 
-    @IsDateString()
-    check_out_at: Date;
+  @IsString()
+  @IsOptional()
+  customer_name: string;
 
-    @IsInt()
-    children: number;
+  @IsString()
+  @IsOptional()
+  customer_phone: string;
 
-    @IsInt()
-    adults: number;
+  @IsString()
+  @IsOptional()
+  customer_email: string;
 
-    @IsInt()
-    total_amount: number;
+  @IsString()
+  @IsOptional()
+  customer_gender: 'Male' | 'Female' | 'Other';
 
-    @IsEnum(['Booked' , 'Cancelled' , 'CheckedIn' , 'CheckedOut' , 'NoShow'])
-    status: 'Booked' | 'Cancelled' | 'CheckedIn' | 'CheckedOut' | 'NoShow';
+  @IsDateString()
+  @IsOptional()
+  customer_birthday: Date;
 
-    @IsInt()
-    customer_id: number;
+  @IsInt()
+  hotel_id: number;
 
-    @IsInt()
-    hotel_id: number;
+  @IsArray()
+  booking_rooms: { room_id: number; price: number }[];
+
+  @IsInt()
+  children: number;
+
+  @IsInt()
+  adults: number;
+
+  @IsOptional()
+  @IsNumber()
+  total_amount: number;
+
+  @IsDateString()
+  check_in_at: Date;
+
+  @IsDateString()
+  check_out_at: Date;
 }
