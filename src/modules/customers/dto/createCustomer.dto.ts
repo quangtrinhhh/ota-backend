@@ -16,6 +16,10 @@ export class CreateCustomerDto {
     @IsEnum(['Male', 'Female', 'Other'])
     gender: 'Male' | 'Female' | 'Other';
 
-    @IsNotEmpty()
+    @IsNotEmpty({ message: 'hotel_id không được để trống' })
     hotel_id: number;
+
+    @IsOptional()
+    @IsDateString({}, { message: 'birthday phải là định dạng ngày hợp lệ (YYYY-MM-DD)' })
+    birthday: string; // Nếu `birthday` là kiểu ngày, bạn có thể dùng `Date`.
 }

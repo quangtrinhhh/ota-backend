@@ -34,12 +34,18 @@ export class CustomerService {
         return new Customer(customer.id, customer.name, customer.birthday, customer.phone, customer.email, customer.gender, customer.hotel_id);
     }
 
-    async updateCustomer(id: number, updateCustomerDto: UpdateCustomerDto) {
+    async updateCustomer(id: number, updateCustomerDto: UpdateCustomerDto): Promise<string> {
         const customer = await this.getDetailCustomer(id);
-        Object.assign(customer, updateCustomerDto);
-        await this.customerRepository.save(customer);
+    
+        // Merge DTO với entity
+        const updatedCustomer = this.customerRepository.merge(customer, updateCustomerDto);
+    
+        // Lưu vào database
+        await this.customerRepository.save(updatedCustomer);
+    
         return 'Update success';
     }
+    
 
     async deleteCustomer(id: number): Promise<string> {
         const result = await this.customerRepository.delete(id);
