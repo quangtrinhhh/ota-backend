@@ -45,6 +45,8 @@ import { ExpenseModule } from './modules/expense/expense.module';
 import { ReceiptModule } from './modules/receips/receip.module';
 import { FloorModule } from './modules/floor/floor.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
+import { EmployeeEntity } from './entities/employee.entity';
+import { EmployeeModule } from './modules/employee/employee.module';
 
 @Module({
   imports: [
@@ -75,6 +77,7 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
         CategoryEntity,
         ExpenseEntity,
         ReceiptEntity,
+        EmployeeEntity,
       ],
       synchronize: true,
     }),
@@ -122,6 +125,7 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
     ReceiptModule,
     FloorModule,
     StatisticsModule,
+    EmployeeModule,
   ],
   controllers: [AppController],
   providers: [
@@ -133,5 +137,5 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
   ],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 }
