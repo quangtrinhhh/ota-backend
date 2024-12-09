@@ -141,6 +141,12 @@ export class BookingController {
   ): Promise<any> {
     const start = new Date(startDate);
     const end = new Date(endDate);
+
+    // Kiểm tra ngày hợp lệ
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return new ResponData(null, HttpStatus.ERROR, 'Ngày không hợp lệ');
+    }
+
     try {
       const rooms = await this.bookingService.getAvailableRooms(
         hotelId,
@@ -149,7 +155,11 @@ export class BookingController {
       );
       return new ResponData(rooms, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
     } catch (error) {
-      return new ResponData(null, HttpStatus.ERROR, error.message);
-    }
+      return new ResponData(
+        null,
+        HttpStatus.ERROR,
+        error?.message || 'Đã xảy ra lỗi',
+      );
+    } 
   }
 }

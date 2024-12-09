@@ -118,6 +118,24 @@ export class BookingService {
             `Room with ID ${room.room_id} is not available in the specified hotel.`,
           );
         }
+        // Kiểm tra nếu ngày nhận phòng trùng với ngày hiện tại
+        const today = new Date();
+        const checkInDate = new Date(check_in_at);
+        if (
+          checkInDate.getFullYear() === today.getFullYear() &&
+          checkInDate.getMonth() === today.getMonth() &&
+          checkInDate.getDate() === today.getDate()
+        ) {
+          console.log(
+            `Room with ID ${room.room_id} has check-in date today. Updating room status to 'Occupied'...`,
+          );
+
+          // Cập nhật trạng thái phòng
+          await this.roomRepository.update(
+            { id: room.room_id },
+            { status: RoomStatus.BOOKED },
+          );
+        }
       }
 
       // 3. Tạo booking
