@@ -397,11 +397,18 @@ export class InvoiceService {
 
   async updateInvoiceTotalAmount(invoice_id: number): Promise<any> {
     const invoiceItems = await this.invoiceItemService.getInvoiceItemsByInvoiceId(invoice_id);
+    const invoice = await this.invoiceRepository.findOne({
+      where: { id: invoice_id },
+      relations: ['booking']
+    })
+
+    const total_amount_booking = invoice.booking.total_amount
+
 
     const countTotalAmount = invoiceItems.reduce((total, item) => {
       return total + item.total_price;
     }, 0);
 
-    await this.invoiceRepository.update(invoice_id, { total_amount: countTotalAmount });
+    await this.invoiceRepository.update(invoice_id, { total_amount: countTotalAmount + total_amount_booking });
   }
 }

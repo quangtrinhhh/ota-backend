@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { RoleEntity } from "src/entities/role.entity";
 import { Role } from "src/models/role.model";
-import { Repository } from "typeorm";
+import { Admin, Not, Repository } from "typeorm";
 import { CreateRoleDto } from "./dto/createRole.dto";
 import { UpdateRoleDto } from "./dto/updateRole.dto";
 
@@ -15,6 +15,10 @@ export class RoleService {
 
     async getRoles(): Promise<Role[]> {
         const roles = await this.roleRepository.find();
+        return roles.map(role => new Role(role.id, role.name, role.description, role.hotel_id));
+    }
+    async getRolesNotAdmin(): Promise<Role[]> {
+        const roles = await this.roleRepository.find({ where: { name: Not('Admin') } });
         return roles.map(role => new Role(role.id, role.name, role.description, role.hotel_id));
     }
 
@@ -51,4 +55,5 @@ export class RoleService {
         const role = await this.roleRepository.findOne({ where: { name: role_name } });
         return role.id;
     }
+
 }

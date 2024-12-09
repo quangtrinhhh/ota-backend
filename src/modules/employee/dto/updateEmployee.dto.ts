@@ -1,10 +1,10 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsInt, IsEnum, IsDateString } from "class-validator";
 
 export class UpdateEmployeeDto {
-    @IsNotEmpty()
+    @IsNotEmpty({ message: 'id không được để trống' })
     id: number;
 
-    @IsOptional()
+    @IsNotEmpty({ message: 'name không được để trống' })
     name: string;
 
     @IsOptional()
@@ -32,7 +32,7 @@ export class UpdateEmployeeDto {
     @IsInt({ message: 'ID người dùng phải là số nguyên' })
     user_id?: number;
 
-    @IsOptional()
+    @IsNotEmpty({ message: 'phoneNumber không được để trống' })
     phoneNumber?: string;
 
     @IsOptional()

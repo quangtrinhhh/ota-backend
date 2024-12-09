@@ -33,6 +33,12 @@ export class UpdateUserDto {
     isActive: boolean;
 
     @IsOptional()
+    status: 'active' | 'inactive';
+
+    @IsOptional()
+    note: string;
+
+    @IsOptional()
     @Type(() => Number)
     @IsInt({ message: 'role_id phải là số nguyên' })
     role_id: number;

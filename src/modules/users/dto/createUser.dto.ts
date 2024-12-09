@@ -1,4 +1,4 @@
-import { IsEmail, IsEmpty, IsNotEmpty, IsOptional, Length, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, Length, MaxLength, MinLength } from "class-validator";
 
 export class CreateUserDto {
     @IsNotEmpty({ message: 'user_name không được để trống' })
@@ -8,7 +8,7 @@ export class CreateUserDto {
     @MinLength(6, { message: 'Mật khẩu chứa ít nhất 6 ký tự' })
     password: string;
 
-    @IsNotEmpty({ message: 'email không được để trống' })
+    @IsOptional()
     @IsEmail({}, { message: 'email không hợp lệ' })
     email: string;
 
@@ -16,6 +16,9 @@ export class CreateUserDto {
     @MinLength(10, { message: 'Số điện thoại chứa ít nhất 10 ký tự' })
     @MaxLength(15, { message: 'Số điện thoại chứa nhiều nhất 15 ký tự' })
     phone: string;
+
+    @IsOptional()
+    note: string;
 
     @IsNotEmpty({ message: 'hotel_id không được để trống' })
     hotel_id: number;

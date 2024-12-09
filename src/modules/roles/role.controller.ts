@@ -15,9 +15,19 @@ export class RoleController {
         try {
             return new ResponData<Role[]>(await this.roleService.getRoles(), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
-            return new ResponData<Role[]>(await this.roleService.getRoles(), HttpStatus.ERROR, HttpMessage.ERROR);
+            return new ResponData<Role[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
+
+    @Get('/getRolesNotAdmin')
+    async getRolesNotAdmin(): Promise<ResponData<Role[]>> {
+        try {
+            return new ResponData<Role[]>(await this.roleService.getRolesNotAdmin(), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+        } catch (error) {
+            return new ResponData<Role[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+        }
+    }
+
 
     @Get(':id')
     async findOneRole(@Param('id') id: number): Promise<ResponData<Role>> {

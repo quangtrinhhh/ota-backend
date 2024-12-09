@@ -2,19 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entities/user.entity';
 import { User } from 'src/models/user.model';
-import { Repository } from 'typeorm';
+import { Like, Not, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { hashPasswordHelper } from 'src/helpers/util';
 
 import { v4 as uuidv4 } from 'uuid';
+import { RoleEntity } from 'src/entities/role.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-  ) {}
+
+    @InjectRepository(RoleEntity)
+    private readonly roleRepository: Repository<RoleEntity>,
+  ) { }
 
   isUserNameExistGlobal = async (user_name: string) => {
     const user = await this.userRepository.findOne({ where: { user_name } });
@@ -22,24 +26,24 @@ export class UserService {
     return false;
   };
 
-  isUserNameExist = async (user_name: string, hotel_id: number) => {
+  isUserNameExist = async (user_name: string, hotel_id: number, user_id?: number) => {
     const user = await this.userRepository.findOne({
-      where: { user_name, hotel_id },
+      where: { user_name, hotel_id, id: Not(user_id) },
     });
     if (user) return true;
     return false;
   };
 
-  isEmailExist = async (email: string, hotel_id: number) => {
+  isEmailExist = async (email: string, hotel_id: number, user_id?: number) => {
     const user = await this.userRepository.findOne({
-      where: { email, hotel_id },
+      where: { email, hotel_id, id: Not(user_id) },
     });
     if (user) return true;
     return false;
   };
-  isPhoneExist = async (phone: string, hotel_id: number) => {
+  isPhoneExist = async (phone: string, hotel_id: number, user_id?: number) => {
     const user = await this.userRepository.findOne({
-      where: { phone, hotel_id },
+      where: { phone, hotel_id, id: Not(user_id) },
     });
     if (user) return true;
     return false;
@@ -71,6 +75,7 @@ export class UserService {
     user.phone = createUserDto.phone;
     user.hotel_id = createUserDto.hotel_id;
     user.role_id = createUserDto.role_id;
+    user.note = createUserDto.note;
     user.code = this.generate6DigitCode();
     user.isActive = true;
 
@@ -78,14 +83,14 @@ export class UserService {
       user.user_name &&
       (await this.isUserNameExist(user.user_name, user.hotel_id))
     ) {
-      throw new Error('Tên tài khoản đã được đăng kí trong khách sạn');
+      throw new Error('Tên tài khoản đã tồn tại');
     }
 
     if (user.email && (await this.isEmailExist(user.email, user.hotel_id))) {
-      throw new Error('Email đã được đăng kí trong khách sạn');
+      throw new Error('Email đã tồn tại');
     }
     if (user.phone && (await this.isPhoneExist(user.phone, user.hotel_id))) {
-      throw new Error('Số điện thoại đã được đăng kí trong khách sạn');
+      throw new Error('Số điện thoại đã tồn tại');
     }
 
     await this.userRepository.save(user);
@@ -118,34 +123,27 @@ export class UserService {
   }
 
   async finByEmail(email: string) {
-    return await this.userRepository.findOne({ where: { email } });
+    return await this.userRepository.findOne({ where: { email, status: 'active', } });
   }
   async finByUserName(user_name: string) {
-    return await this.userRepository.findOne({ where: { user_name } });
+    return await this.userRepository.findOne({ where: { user_name, status: 'active', } });
   }
+
 
   async updateUser(updateUserDto: UpdateUserDto): Promise<string> {
     const { id, hotel_id, ...updateData } = updateUserDto;
-
-    if (
-      updateData.email &&
-      (await this.isEmailExist(updateData.email, hotel_id))
-    ) {
-      throw new Error('Email đã được đăng kí trong khách sạn');
-    }
-
-    if (
-      updateData.phone &&
-      (await this.isPhoneExist(updateData.phone, hotel_id))
-    ) {
-      throw new Error('Số điện thoại đã được đăng kí trong khách sạn');
-    }
-
     if (
       updateData.user_name &&
-      (await this.isUserNameExist(updateData.user_name, hotel_id))
+      (await this.isUserNameExist(updateData.user_name, hotel_id, id))
     ) {
-      throw new Error('Tên tài khoản đã được đăng kí trong khách sạn');
+      throw new Error('Tên tài khoản đã tồn tại');
+    }
+
+    if (updateData.email && (await this.isEmailExist(updateData.email, hotel_id, id))) {
+      throw new Error('Email đã tồn tại');
+    }
+    if (updateData.phone && (await this.isPhoneExist(updateData.phone, hotel_id, id))) {
+      throw new Error('Số điện thoại đã tồn tại');
     }
 
     if (updateData.password) {
@@ -158,6 +156,13 @@ export class UserService {
 
   async deleteUser(id: number): Promise<string> {
     await this.userRepository.delete(id);
+
+    return `Delete user ${id} success`;
+  }
+
+  async deleteUsers(id: number[]): Promise<string> {
+    await this.userRepository.delete(id);
+
     return `Delete user ${id} success`;
   }
 
@@ -233,5 +238,36 @@ export class UserService {
     });
 
     return users;
+  }
+
+  async getUsersByHotelIdNotRoleAdmin(
+    hotel_id: number,
+    currentPage: number,
+    pageSize: number,
+  ) {
+    const skip = (currentPage - 1) * pageSize
+    const role = await this.roleRepository.findOne({ where: { hotel_id, name: "Admin" } })
+    const [users, count] = await this.userRepository.findAndCount(
+      {
+        where: {
+          hotel_id,
+          role: Not(role.id),
+        },
+        skip,
+        take: pageSize
+      }
+    )
+    const totalPages = Math.ceil(count / pageSize);
+
+    return {
+      count: totalPages,
+      users
+    };
+  }
+  async updateStatus(id: number) {
+    const user = await this.userRepository.findOne({ where: { id } })
+    const newStatus = user.status === 'active' ? 'inactive' : 'active'
+    await this.userRepository.update(id, { status: newStatus })
+    return 'User status updated successfully' + newStatus
   }
 }

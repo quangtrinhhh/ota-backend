@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -15,14 +16,12 @@ import { UserService } from './user.service';
 import { User } from 'src/models/user.model';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
-import { Public } from 'src/decorator/customize';
 import { JwtAuthGuard } from 'src/auth/passport/jwt-auth.guard';
-import { get } from 'http';
 import { GetUser } from 'src/decorator/user.decorator';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Get()
   async getUsers(): Promise<ResponData<User[]>> {
@@ -38,11 +37,28 @@ export class UserController {
     }
   }
 
+  @Get('getUsersByHotelIdNotRoleAdmin')
+  async getUsersByHotelIdNotRoleAdmin(
+    @Query('hotel_id') hotel_id: number,
+    @Query('currentPage') currentPage: number,
+    @Query('pageSize') pageSize: number,
+  ) {
+    try {
+      const result = await this.userService.getUsersByHotelIdNotRoleAdmin(
+        hotel_id,
+        currentPage,
+        pageSize,
+      );
+      return new ResponData<any>(result, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+    } catch (error) {
+      return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
   @Get(':id')
   async getDetailUser(@Param('id') id: number): Promise<ResponData<User>> {
     try {
       const user = await this.userService.getDetailUser(id);
-      console.log(user);
 
       return new ResponData<User>(
         user,
@@ -53,7 +69,7 @@ export class UserController {
       return new ResponData<User>(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
-  @Public()
+
   @Post()
   async createUser(
     @Body(new ValidationPipe()) createUserDto: CreateUserDto,
@@ -91,6 +107,22 @@ export class UserController {
     }
   }
 
+  @Delete('/deleteUsers')
+  async deleteUsers(@Body() body: any): Promise<ResponData<string>> {
+    try {
+      const ids = body?.id;
+      console.log("id", ids);
+
+      return new ResponData<string>(
+        await this.userService.deleteUsers(ids),
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
+    } catch (error) {
+      return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
   @Delete(':id')
   async deleteUser(@Param('id') id: number): Promise<ResponData<string>> {
     try {
@@ -103,6 +135,7 @@ export class UserController {
       return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
+
   @UseGuards(JwtAuthGuard)
   @Get('/userbyhotel/all')
   async getIdbyHotel(@GetUser() user: any): Promise<any> {
@@ -113,6 +146,24 @@ export class UserController {
     } catch (error) {
       console.error(error); // Log lỗi để tiện theo dõi
       return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
+  @Put('updateStatus/:id')
+  async updateStatus(
+    @Param('id') id: number,
+  ): Promise<ResponData<string>> {
+    try {
+      return new ResponData<string>(
+        await this.userService.updateStatus(id),
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
+    } catch (error) {
+      if (error.message) {
+        return new ResponData<string>(null, HttpStatus.ERROR, error.message);
+      }
+      return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
 }

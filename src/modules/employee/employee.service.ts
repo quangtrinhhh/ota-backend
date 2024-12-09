@@ -103,7 +103,7 @@ export class EmployeeService {
     }
 
 
-    async deleteEmployees(id: number): Promise<string> {
+    async deleteEmployees(id: number[]): Promise<string> {
         const result = await this.employeeRepository.delete(id);
         if (result.affected === 0) {
             throw new NotFoundException(`Employee with ID ${id} not found`);

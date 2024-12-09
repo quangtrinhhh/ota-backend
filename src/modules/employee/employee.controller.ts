@@ -75,11 +75,12 @@ export class EmployeeController {
         }
     }
 
-    @Delete(':id')
-    async deleteEmployees(@Param('id') id: number): Promise<ResponData<string>> {
+    @Delete('deleteEmployees')
+    async deleteEmployees(@Body() body: any): Promise<ResponData<string>> {
         try {
+            const ids = body?.id;
             return new ResponData<string>(
-                await this.employeeService.deleteEmployees(id),
+                await this.employeeService.deleteEmployees(ids),
                 HttpStatus.SUCCESS,
                 HttpMessage.SUCCESS,
             );

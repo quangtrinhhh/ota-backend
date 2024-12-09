@@ -35,17 +35,10 @@ export class CustomerService {
     }
 
     async updateCustomer(id: number, updateCustomerDto: UpdateCustomerDto): Promise<string> {
-        const customer = await this.getDetailCustomer(id);
-    
-        // Merge DTO với entity
-        const updatedCustomer = this.customerRepository.merge(customer, updateCustomerDto);
-    
-        // Lưu vào database
-        await this.customerRepository.save(updatedCustomer);
-    
+        await this.customerRepository.update(id, updateCustomerDto);
         return 'Update success';
     }
-    
+
 
     async deleteCustomer(id: number): Promise<string> {
         const result = await this.customerRepository.delete(id);

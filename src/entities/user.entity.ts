@@ -33,6 +33,16 @@ export class UserEntity extends BaseEntity {
     @Column()
     isActive: boolean;
 
+    @Column({ nullable: true, default: null })
+    note: string | null;
+
+    @Column({
+        type: 'enum',
+        enum: ['active', 'inactive'],
+        default: 'active',
+    })
+    status: 'active' | 'inactive';
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
 
