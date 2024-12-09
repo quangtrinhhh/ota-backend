@@ -8,6 +8,8 @@ import { BookingRoomEntity } from 'src/entities/bookingRoom.entity';
 import { RoomEntity, RoomStatus } from 'src/entities/room.entity';
 import { CustomerEntity } from 'src/entities/customer.entity';
 import { HotelEntity } from 'src/entities/hotel.entity';
+import { InvoiceService } from '../invoice/invoice.service';
+import { CreateInvoiceDto } from '../invoice/dto/createInvoice.dto';
 
 @Injectable()
 export class BookingService {
@@ -22,6 +24,8 @@ export class BookingService {
     private readonly customerRepository: Repository<CustomerEntity>,
     @InjectRepository(HotelEntity)
     private readonly hotelRepository: Repository<HotelEntity>,
+
+    private readonly invoiceService: InvoiceService,
   ) {}
 
   // Lấy tất cả các booking
@@ -161,7 +165,20 @@ export class BookingService {
         });
       });
       await this.bookingRoomRepository.save(bookingRooms);
+      const invoiceDto: CreateInvoiceDto = {
+        total_amount: 0,
+        discount_amount: 0,
+        discount_percentage: 0,
+        note_discount: '',
+        note: 'Booking payment',
+        customer_id: customer.id,
+        payment_method: 'Cash',
+        status: 'Unpaid',
+        booking_id: newBooking.id,
+        hotel_id,
+      };
 
+      await this.invoiceService.createInvoice(invoiceDto);
       return { newBooking, bookingRooms, customer };
     } catch (error) {
       console.error('Error creating booking:', error);

@@ -7,6 +7,8 @@ import { BookingRoomEntity } from 'src/entities/bookingRoom.entity';
 import { RoomEntity } from 'src/entities/room.entity';
 import { CustomerEntity } from 'src/entities/customer.entity';
 import { HotelEntity } from 'src/entities/hotel.entity';
+import { InvoiceService } from '../invoice/invoice.service';
+import { InvoiceModule } from '../invoice/invoice.module';
 
 @Module({
   imports: [
@@ -17,6 +19,7 @@ import { HotelEntity } from 'src/entities/hotel.entity';
       CustomerEntity,
       HotelEntity,
     ]),
+    InvoiceModule,
   ],
   controllers: [BookingController],
   providers: [BookingService],
