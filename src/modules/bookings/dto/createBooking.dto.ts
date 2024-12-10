@@ -62,4 +62,12 @@ export class CreateBookingDto {
 
   @IsDateString()
   check_out_at: Date;
+
+  @IsOptional()
+  @IsNumber()
+  paidAmount: number;
+
+  @IsOptional()
+  @IsString()
+  paymentMethod: 'Cash' | 'Credit_card' | 'Bank_transfer';
 }
