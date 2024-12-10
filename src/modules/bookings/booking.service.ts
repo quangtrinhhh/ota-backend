@@ -149,7 +149,7 @@ export class BookingService {
         children,
         adults,
         total_amount: calculatedTotalAmount,
-        check_in_at,
+        booking_at: check_in_at,
         check_out_at,
         status: 'Booked', // Mặc định là Booked
       });
@@ -161,12 +161,13 @@ export class BookingService {
           booking_id: newBooking.id,
           room_id: room.room_id,
           price: room.price,
+          price_type: room.price_type,
           hotel_id,
         });
       });
       await this.bookingRoomRepository.save(bookingRooms);
       const invoiceDto: CreateInvoiceDto = {
-        total_amount: 0,
+        total_amount: total_amount,
         discount_amount: 0,
         discount_percentage: 0,
         note_discount: '',
@@ -265,7 +266,7 @@ export class BookingService {
         .andWhere(
           `NOT (
             booking.check_out_at <= :startDate OR 
-            booking.check_in_at >= :endDate
+            booking.booking_at >= :endDate
           )`,
           { startDate, endDate },
         )

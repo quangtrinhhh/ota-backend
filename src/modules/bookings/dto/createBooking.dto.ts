@@ -40,7 +40,11 @@ export class CreateBookingDto {
 
   @IsNotEmpty({ message: 'booking_rooms không được để trống' })
   @IsArray()
-  booking_rooms: { room_id: number; price: number }[];
+  booking_rooms: {
+    room_id: number;
+    price: number;
+    price_type: 'hourly_rate' | 'daily_rate' | 'overnight_rate';
+  }[];
 
   @IsInt()
   children: number;
