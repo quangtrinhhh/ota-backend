@@ -187,19 +187,20 @@ export class BookingService {
 
       const invoice = await this.invoiceService.createInvoice(invoiceDto);
 
-      const invoicePaymentDto: CreateInvoicePaymentDto = {
-        amount: paidAmount,
-        payment_method: paymentMethod,
-        note: `thanh toán trước ${paidAmount}`,
-        invoice_id: invoice.id,
-      };
+      if (paidAmount && paidAmount > 0) {
+        const invoicePaymentDto: CreateInvoicePaymentDto = {
+          amount: paidAmount,
+          payment_method: paymentMethod,
+          note: `thanh toán trước ${paidAmount}`,
+          invoice_id: invoice.id,
+        };
 
-      const invoicePayment =
         await this.InvoicePaymentService.createInvoicePayment(
           invoicePaymentDto,
         );
+      }
 
-      return { newBooking, bookingRooms, customer, invoicePayment };
+      return { newBooking, bookingRooms, customer };
     } catch (error) {
       console.error('Error creating booking:', error);
       throw new Error(`Error creating booking: ${error.message}`);
