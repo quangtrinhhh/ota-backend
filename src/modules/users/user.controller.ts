@@ -42,12 +42,16 @@ export class UserController {
     @Query('hotel_id') hotel_id: number,
     @Query('currentPage') currentPage: number,
     @Query('pageSize') pageSize: number,
+    @Query('status') status: string,
+    @Query('search') search: string,
   ) {
     try {
       const result = await this.userService.getUsersByHotelIdNotRoleAdmin(
         hotel_id,
         currentPage,
         pageSize,
+        status,
+        search,
       );
       return new ResponData<any>(result, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
     } catch (error) {

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { EmployeeEntity } from "src/entities/employee.entity";
 import { Employee } from "src/models/employee.model";
-import { Repository } from "typeorm";
+import { In, Like, Repository } from "typeorm";
 import { CreateEmployeeDto } from "./dto/createEmployee.dto";
 import { UpdateEmployeeDto } from "./dto/updateEmployee.dto";
 
@@ -24,28 +24,35 @@ export class EmployeeService {
     };
 
 
-    async getEmployeesByHotelId(hotel_id: number): Promise<Employee[]> {
-        const employees = await this.employeeRepository.find({ where: { hotel_id } });
-        return employees.map(employee => new Employee(
-            employee.id,
-            employee.code,
-            employee.name,
-            employee.birthDate,
-            employee.gender,
-            employee.idCard,
-            employee.position,
-            employee.startDate,
-            employee.user_id,
-            employee.phoneNumber,
-            employee.email,
-            employee.facebook,
-            employee.address,
-            employee.notes,
-            employee.img,
-            employee.status,
-            employee.hotel_id
-        )
-        );
+    async getEmployeesByHotelId(
+        hotel_id: number,
+        currentPage: number,
+        pageSize: number,
+        status: string,
+        search: string,
+    ): Promise<any> {
+        const skip = (currentPage - 1) * pageSize
+        const whereCondition: any = {
+            hotel_id
+        }
+        if (search) {
+            whereCondition.name = Like(`%${search}%`)
+        }
+        if (status) {
+            const statuses = status.split(",").map(s => s.trim());
+            whereCondition.status = In(statuses)
+        }
+
+        const [employees, count] = await this.employeeRepository.findAndCount({
+            where: whereCondition,
+            skip,
+            take: pageSize,
+        });
+        const totalPages = Math.ceil(count / pageSize);
+        return {
+            count: totalPages,
+            employees
+        }
     }
 
     async createEmployees(createEmployees: CreateEmployeeDto[]): Promise<any[]> {

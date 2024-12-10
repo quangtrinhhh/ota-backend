@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, ValidationPipe } from "@nestjs/common";
 import { ResponData } from "src/global/globalClass";
 import { HttpMessage, HttpStatus } from "src/global/globalEnum";
 import { EmployeeService } from "./employee.service";
@@ -11,19 +11,31 @@ import { UpdateEmployeeDto } from "./dto/updateEmployee.dto";
 export class EmployeeController {
     constructor(private readonly employeeService: EmployeeService) { }
 
-    @Get(':hotel_id')
-    async getEmployeesByHotelId(@Param('hotel_id') hotel_id: number): Promise<ResponData<Employee[]>> {
+    @Get()
+    async getEmployeesByHotelId(
+        @Query('hotel_id') hotel_id: number,
+        @Query('currentPage') currentPage: number,
+        @Query('pageSize') pageSize: number,
+        @Query('status') status: string,
+        @Query('search') search: string,
+    ): Promise<ResponData<any>> {
         try {
-            return new ResponData<Employee[]>(
-                await this.employeeService.getEmployeesByHotelId(hotel_id),
+            return new ResponData<any>(
+                await this.employeeService.getEmployeesByHotelId(
+                    hotel_id,
+                    currentPage,
+                    pageSize,
+                    status,
+                    search,
+                ),
                 HttpStatus.SUCCESS,
                 HttpMessage.SUCCESS,
             );
         } catch (error) {
             if (error.message) {
-                return new ResponData<Employee[]>(null, HttpStatus.ERROR, error.message);
+                return new ResponData<any>(null, HttpStatus.ERROR, error.message);
             }
-            return new ResponData<Employee[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+            return new ResponData<any>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }
 

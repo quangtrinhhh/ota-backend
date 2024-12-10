@@ -244,15 +244,31 @@ export class UserService {
     hotel_id: number,
     currentPage: number,
     pageSize: number,
+    status: string,
+    search: string,
   ) {
     const skip = (currentPage - 1) * pageSize
+    const status_ = status === 'all' ? undefined : status as 'active' | 'inactive';
+
+
     const role = await this.roleRepository.findOne({ where: { hotel_id, name: "Admin" } })
+    const whereCondition: any = {
+      hotel_id,
+      role: Not(role.id),
+    }
+
+    if (status_) {
+      whereCondition.status = status_
+    }
+    if (search) {
+      whereCondition.user_name = Like(`%${search}%`)
+      console.log(search);
+
+    }
+
     const [users, count] = await this.userRepository.findAndCount(
       {
-        where: {
-          hotel_id,
-          role: Not(role.id),
-        },
+        where: whereCondition,
         skip,
         take: pageSize
       }
