@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, ValidationPipe } from "@nestjs/common";
 import { CategoryService } from "./category.service";
 import { HttpMessage, HttpStatus } from "src/global/globalEnum";
 import { ResponData } from "src/global/globalClass";
@@ -24,6 +24,22 @@ export class CategoryController {
     ): Promise<ResponData<Category[]>> {
         try {
             return new ResponData<Category[]>(await this.categoryService.getCategoriesByHotelId(hotel_id), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+        } catch (error) {
+            return new ResponData<Category[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+        }
+    }
+
+    @Get('getCategoriesByHotelIdAdmin')
+    async getCategoriesByHotelIdAdmin(
+        @Query('hotel_id') hotel_id: number,
+        @Query('search') search: string,
+    ): Promise<ResponData<Category[]>> {
+        try {
+            return new ResponData<Category[]>(
+                await this.categoryService.getCategoriesByHotelIdAdmin(
+                    hotel_id,
+                    search
+                ), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
             return new ResponData<Category[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }

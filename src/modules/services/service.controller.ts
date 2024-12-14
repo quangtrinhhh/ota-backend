@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, ValidationPipe } from "@nestjs/common";
 import { ServiceService } from "./service.service";
 import { HttpMessage, HttpStatus } from "src/global/globalEnum";
 import { ResponData } from "src/global/globalClass";
@@ -30,6 +30,30 @@ export class ServiceController {
         }
     }
 
+    @Get('getServicesByHotelIdAdmin')
+    async getServicesByHotelIdAdmin(
+        @Query('hotel_id') hotel_id: number,
+        @Query('currentPage') currentPage: number,
+        @Query('pageSize') pageSize: number,
+        @Query('status') status: string,
+        @Query('search') search: string,
+        @Query('name_category') name_category: string,
+    ) {
+        try {
+            const result = await this.serviceService.getServicesByHotelIdAdmin(
+                hotel_id,
+                currentPage,
+                pageSize,
+                status,
+                search,
+                name_category,
+            );
+            return new ResponData<any>(result, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+        } catch (error) {
+            return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
+        }
+    }
+
     @Get(':id')
     async findOneService(@Param('id') id: number): Promise<ResponData<Service>> {
         try {
@@ -57,11 +81,45 @@ export class ServiceController {
         }
     }
 
+    @Delete('/deleteServices')
+    async deleteServices(@Body() body: any): Promise<ResponData<string>> {
+        try {
+            const ids = body?.id;
+
+            return new ResponData<string>(
+                await this.serviceService.deleteServices(ids),
+                HttpStatus.SUCCESS,
+                HttpMessage.SUCCESS,
+            );
+        } catch (error) {
+            return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+        }
+    }
+
     @Delete(':id')
     async deleteService(@Param('id') id: number): Promise<ResponData<string>> {
         try {
             return new ResponData<string>(await this.serviceService.deleteService(id), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
+            return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
+        }
+    }
+
+
+    @Put('updateStatus/:id')
+    async updateStatus(
+        @Param('id') id: number,
+    ): Promise<ResponData<string>> {
+        try {
+            return new ResponData<string>(
+                await this.serviceService.updateStatus(id),
+                HttpStatus.SUCCESS,
+                HttpMessage.SUCCESS,
+            );
+        } catch (error) {
+            if (error.message) {
+                return new ResponData<string>(null, HttpStatus.ERROR, error.message);
+            }
             return new ResponData<string>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
     }

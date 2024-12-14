@@ -1,10 +1,10 @@
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty, IsOptional } from "class-validator";
 
 export class CreateServiceDto {
     @IsNotEmpty({ message: 'name không được để trống' })
     name: string;
 
-    @IsNotEmpty({ message: 'description không được để trống' })
+    @IsOptional()
     description: string;
 
     @IsNotEmpty({ message: 'unit_price không được để trống' })

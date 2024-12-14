@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ServiceEntity } from "src/entities/service.entity";
 import { Service } from "src/models/service.model";
-import { Repository } from "typeorm";
+import { Like, Not, Repository } from "typeorm";
 import { CreateServiceDto } from "./dto/createService.dto";
 import { UpdateServiceDto } from "./dto/updateService.dto";
 
@@ -27,6 +27,8 @@ export class ServiceService {
     }
 
     async createService(createServiceDto: CreateServiceDto): Promise<Service> {
+        console.log("dã vao");
+
         const service = new Service();
         service.name = createServiceDto.name;
         service.description = createServiceDto.description;
@@ -52,9 +54,14 @@ export class ServiceService {
         return `Delete service ${id} success`;
     }
 
+    async deleteServices(id: number[]): Promise<string> {
+        await this.serviceRepository.delete(id);
+        return `Delete service ${id} success`;
+    }
+
     async getServicesByHotelId(hotel_id: number): Promise<Service[]> {
         const services = await this.serviceRepository.find({
-            where: { category: { hotel_id } },
+            where: { category: { hotel_id }, status: Not('out_of_business') },
             relations: ['category', 'category.hotel'],
         });
 
@@ -70,5 +77,64 @@ export class ServiceService {
                 hotel_id: service.category.hotel_id,
             }
         }));
+    }
+
+    async getServicesByHotelIdAdmin(
+        hotel_id: number,
+        currentPage: number,
+        pageSize: number,
+        status: string,
+        search: string,
+        name_category: string,
+    ) {
+        const skip = (currentPage - 1) * pageSize
+        const status_ = status === 'all' ? undefined : status as 'in_business' | 'out_of_business';
+        const name_category_ = name_category === 'all' ? undefined : name_category;
+
+        const whereCondition: any = {
+            category: { hotel_id },
+        }
+
+        if (status_) {
+            whereCondition.status = status_
+        }
+        if (search) {
+            whereCondition.name = Like(`%${search}%`)
+        }
+        if (name_category) {
+            whereCondition.category = { name: name_category_ }
+        }
+
+        const [services, count] = await this.serviceRepository.findAndCount(
+            {
+                where: whereCondition,
+                relations: ['category', 'category.hotel'],
+                skip,
+                take: pageSize
+            }
+        )
+
+        const totalPages = Math.ceil(count / pageSize);
+
+        return {
+            count: totalPages,
+            services: services.map(service => ({
+                ...service,
+                category: {
+                    id: service.category.id,
+                    name: service.category.name,
+                    description: service.category.description,
+                    hotel_id: service.category.hotel_id,
+                }
+            }))
+        };
+    }
+
+    async updateStatus(id: number) {
+        const service = await this.serviceRepository.findOne({ where: { id } })
+
+        const newStatus = service.status === 'in_business' ? 'out_of_business' : 'in_business'
+        await this.serviceRepository.update(id, { status: newStatus })
+        return 'service status updated successfully' + newStatus
     }
 }

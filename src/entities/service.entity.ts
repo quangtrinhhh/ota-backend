@@ -21,4 +21,12 @@ export class ServiceEntity extends BaseEntity {
 
     @Column()
     category_id: number;  // ID của loại dịch vụ
+
+    @Column({
+        type: 'enum',
+        enum: ['in_business', 'out_of_business'],
+        default: 'in_business',
+    })
+    status: 'in_business' | 'out_of_business';
+
 }
