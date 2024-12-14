@@ -32,7 +32,7 @@ export class RoomService {
     private floorRepository: Repository<FloorEntity>,
     @InjectRepository(BookingRoomEntity)
     private readonly bookingRoomRepository: Repository<BookingRoomEntity>,
-  ) { }
+  ) {}
   //tạo phòng
   async createRoom(dto: CreateRoomDto, user_id: number): Promise<any> {
     const { name, price, room_type_id, floor_id, notes, start_date_use } = dto;
@@ -333,19 +333,19 @@ export class RoomService {
           bookings:
             bookingsToday.length > 0 || bookingsInUse.length > 0
               ? [...bookingsToday, ...bookingsInUse].map((bookingRoom) => ({
-                id: bookingRoom.booking.id,
-                booking_at: bookingRoom.booking.booking_at,
-                check_in_at: bookingRoom.booking.check_in_at,
-                check_out_at: bookingRoom.booking.check_out_at,
-                status: bookingRoom.booking.status,
-                children: bookingRoom.booking.children,
-                adults: bookingRoom.booking.adults,
-                customer: {
-                  id: bookingRoom.booking.customer?.id,
-                  name: bookingRoom.booking.customer?.name,
-                },
-                invoice_id: bookingRoom.booking.invoices[0]?.id,
-              }))
+                  id: bookingRoom.booking.id,
+                  booking_at: bookingRoom.booking.booking_at,
+                  check_in_at: bookingRoom.booking.check_in_at,
+                  check_out_at: bookingRoom.booking.check_out_at,
+                  status: bookingRoom.booking.status,
+                  children: bookingRoom.booking.children,
+                  adults: bookingRoom.booking.adults,
+                  customer: {
+                    id: bookingRoom.booking.customer?.id,
+                    name: bookingRoom.booking.customer?.name,
+                  },
+                  invoice_id: bookingRoom.booking.invoices[0]?.id,
+                }))
               : null,
         };
 
@@ -395,8 +395,10 @@ export class RoomService {
           const bookingDate = new Date(bookingRoom.booking.booking_at);
           bookingDate.setHours(0, 0, 0, 0);
 
-          return bookingDate.getTime() === today.getTime() &&
-            bookingRoom.booking.status === 'Booked';
+          return (
+            bookingDate.getTime() === today.getTime() &&
+            bookingRoom.booking.status === 'Booked'
+          );
         });
 
         // Lọc các booking của phòng, chỉ lấy booking có check_in_at là hôm qua và check_out_at chưa qua hôm nay
@@ -439,16 +441,16 @@ export class RoomService {
                   },
                   invoice:
                     bookingRoom.booking.invoices &&
-                      bookingRoom.booking.invoices.length > 0
+                    bookingRoom.booking.invoices.length > 0
                       ? bookingRoom.booking.invoices.map((invoice) => ({
-                        id: invoice.id,
-                        // issue_at: invoice.issue_at,
-                        // total_amount: invoice.total_amount,
-                        // discount_amount: invoice.discount_amount,
-                        // discount_percentage: invoice.discount_percentage,
-                        // payment_method: invoice.payment_method,
-                        status: invoice.status,
-                      }))
+                          id: invoice.id,
+                          // issue_at: invoice.issue_at,
+                          // total_amount: invoice.total_amount,
+                          // discount_amount: invoice.discount_amount,
+                          // discount_percentage: invoice.discount_percentage,
+                          // payment_method: invoice.payment_method,
+                          status: invoice.status,
+                        }))
                       : null,
                 }),
               ),
@@ -527,14 +529,14 @@ export class RoomService {
           status: bookingRoom.booking.status,
           customer: bookingRoom.booking.customer
             ? {
-              id: bookingRoom.booking.customer.id,
-              name: bookingRoom.booking.customer.name || null,
-              phone: bookingRoom.booking.customer.phone || null,
-              email: bookingRoom.booking.customer.email || null,
-              gender: bookingRoom.booking.customer.gender || null,
-              birthday: bookingRoom.booking.customer.birthday || null,
-              hotel_id: bookingRoom.booking.customer.hotel_id || null,
-            }
+                id: bookingRoom.booking.customer.id,
+                name: bookingRoom.booking.customer.name || null,
+                phone: bookingRoom.booking.customer.phone || null,
+                email: bookingRoom.booking.customer.email || null,
+                gender: bookingRoom.booking.customer.gender || null,
+                birthday: bookingRoom.booking.customer.birthday || null,
+                hotel_id: bookingRoom.booking.customer.hotel_id || null,
+              }
             : null, // Trường hợp không có thông tin khách hàng
         })),
     };
@@ -613,19 +615,19 @@ export class RoomService {
             bookings:
               bookingsToday.length > 0 || bookingsInUse.length > 0
                 ? [...bookingsToday, ...bookingsInUse].map((bookingRoom) => ({
-                  id: bookingRoom.booking.id,
-                  booking_at: bookingRoom.booking.booking_at,
-                  check_in_at: bookingRoom.booking.check_in_at,
-                  check_out_at: bookingRoom.booking.check_out_at,
-                  status: bookingRoom.booking.status,
-                  children: bookingRoom.booking.children,
-                  adults: bookingRoom.booking.adults,
-                  customer: {
-                    id: bookingRoom.booking.customer?.id,
-                    name: bookingRoom.booking.customer?.name,
-                  },
-                  invoice_id: bookingRoom.booking.invoices[0]?.id,
-                }))
+                    id: bookingRoom.booking.id,
+                    booking_at: bookingRoom.booking.booking_at,
+                    check_in_at: bookingRoom.booking.check_in_at,
+                    check_out_at: bookingRoom.booking.check_out_at,
+                    status: bookingRoom.booking.status,
+                    children: bookingRoom.booking.children,
+                    adults: bookingRoom.booking.adults,
+                    customer: {
+                      id: bookingRoom.booking.customer?.id,
+                      name: bookingRoom.booking.customer?.name,
+                    },
+                    invoice_id: bookingRoom.booking.invoices[0]?.id,
+                  }))
                 : null,
           };
 
@@ -647,7 +649,7 @@ export class RoomService {
     const totalRooms = await this.roomRepository.count({
       where: { hotel_id: hotelId },
     });
-    console.log("totalRooms", totalRooms);
+    console.log('totalRooms', totalRooms);
     const emptyRooms = await this.roomRepository.count({
       where: { hotel_id: hotelId, status: RoomStatus.EMPTY },
     });
@@ -671,5 +673,82 @@ export class RoomService {
       occupiedRooms,
       notCheckedOutRooms,
     };
+  }
+  async getRoomsWithBookings(hotel_id: number): Promise<any[]> {
+    const rooms = await this.roomRepository.find({
+      where: { hotel_id }, // Lọc theo hotel_id
+      relations: [
+        'booking_rooms',
+        'booking_rooms.booking',
+        'booking_rooms.booking.invoices',
+        'booking_rooms.booking.customer', // Đảm bảo customer cũng được truy vấn
+        'room_type',
+        'hotel',
+      ],
+    });
+
+    return rooms.map((room) => {
+      return {
+        id: room.id.toString(),
+        label: {
+          icon: room.clean_status
+            ? 'https://images.vexels.com/content/196596/preview/clean-squeaky-icon-acd7fe.png'
+            : 'https://www.freeiconspng.com/thumbs/clear-icon/clear-icon-25.png',
+          title: room.name,
+          subtitle: room.room_type ? room.room_type.name : 'Unknown',
+          category: room.room_type ? room.room_type.name : 'Unknown',
+        },
+        data: room.booking_rooms
+          .map((bookingRoom) => {
+            const booking = bookingRoom.booking;
+            if (!booking) return null; // Tránh lỗi nếu booking không tồn tại
+
+            const customerName = booking.customer
+              ? booking.customer.name
+              : 'Unknown Customer';
+
+            // Tính toán occupancy (số giây giữa booking_at và check_out_at)
+            const bookingStart = new Date(booking.booking_at);
+            const bookingEnd = new Date(booking.check_out_at);
+
+            // Tính số giây giữa hai thời điểm
+            const occupancyInSeconds =
+              (bookingEnd.getTime() - bookingStart.getTime()) / 1000;
+            // Áp dụng màu sắc cho status
+            let statusColor = '';
+            switch (room.status) {
+              case RoomStatus.BOOKED:
+                statusColor = 'rgb(24, 119, 242)'; // Màu xanh dương cho đã đặt
+                break;
+              case RoomStatus.NOT_ARRIVED:
+                statusColor = 'rgb(209, 71, 163)'; // Màu tím cho chưa đến
+                break;
+              case RoomStatus.OCCUPIED:
+                statusColor = 'rgb(0, 82, 84)'; // Màu đỏ cho có khách
+                break;
+              case RoomStatus.NOT_CHECKED_OUT:
+                statusColor = 'rgb(255, 136, 0)'; // Màu hồng cho đã trả
+                break;
+              default:
+                statusColor = 'rgb(39, 150, 86)'; // Màu mặc định phòng trống
+            }
+            return {
+              id: room.id,
+              room_id: room.id,
+              booking_id: booking.id,
+              invoice_id: booking.invoices[0].id,
+              startDate: booking.booking_at,
+              endDate: booking.check_out_at,
+              occupancy: occupancyInSeconds, // Đổi occupancy thành giây
+              title: customerName,
+              subtitle: room.name,
+              description: `${booking.adults} người lớn, ${booking.children} trẻ em`,
+              status: room.status,
+              bgColor: statusColor,
+            };
+          })
+          .filter((booking) => booking !== null), // Loại bỏ các null nếu không có booking
+      };
+    });
   }
 }
