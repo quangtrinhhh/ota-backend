@@ -180,4 +180,21 @@ export class roomController {
       return new ResponData(null, HttpStatus.ERROR, error.message);
     }
   }
+
+  @Get('calendar/roombookings/:hotel_id') // Thêm ':hotel_id' vào URL
+  async getRooms(
+    @Param('hotel_id', ParseIntPipe) hotel_id: number, // Thêm tham số hotel_id
+  ): Promise<any> {
+    try {
+      const roomsWithBookings =
+        await this.roomService.getRoomsWithBookings(hotel_id);
+      return new ResponData(
+        roomsWithBookings,
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
+    } catch (error) {
+      return new ResponData(null, HttpStatus.ERROR, error.message);
+    }
+  }
 }
