@@ -16,6 +16,7 @@ import { UserEntity } from 'src/entities/user.entity';
 import { FloorEntity } from 'src/entities/floor.entity';
 import { BookingEntity } from 'src/entities/booking.entity';
 import { BookingRoomEntity } from 'src/entities/bookingRoom.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 export class RoomService {
   constructor(
@@ -681,7 +682,7 @@ export class RoomService {
         'booking_rooms',
         'booking_rooms.booking',
         'booking_rooms.booking.invoices',
-        'booking_rooms.booking.customer', // Đảm bảo customer cũng được truy vấn
+        'booking_rooms.booking.customer',
         'room_type',
         'hotel',
       ],
@@ -733,7 +734,7 @@ export class RoomService {
                 statusColor = 'rgb(39, 150, 86)'; // Màu mặc định phòng trống
             }
             return {
-              id: room.id,
+              id: uuidv4(),
               room_id: room.id,
               booking_id: booking.id,
               invoice_id: booking.invoices[0].id,
