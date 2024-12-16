@@ -17,8 +17,8 @@ export class RoleService {
         const roles = await this.roleRepository.find();
         return roles.map(role => new Role(role.id, role.name, role.description, role.hotel_id));
     }
-    async getRolesNotAdmin(): Promise<Role[]> {
-        const roles = await this.roleRepository.find({ where: { name: Not('Admin') } });
+    async getRolesByHotelIdNotAdmin(hotel_id: number): Promise<Role[]> {
+        const roles = await this.roleRepository.find({ where: { name: Not('Admin'), hotel_id } });
         return roles.map(role => new Role(role.id, role.name, role.description, role.hotel_id));
     }
 

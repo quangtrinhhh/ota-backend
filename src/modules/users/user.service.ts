@@ -269,6 +269,7 @@ export class UserService {
     const [users, count] = await this.userRepository.findAndCount(
       {
         where: whereCondition,
+        order: { created_at: 'DESC' },
         skip,
         take: pageSize
       }

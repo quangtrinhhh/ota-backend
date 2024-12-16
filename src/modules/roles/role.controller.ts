@@ -19,10 +19,10 @@ export class RoleController {
         }
     }
 
-    @Get('/getRolesNotAdmin')
-    async getRolesNotAdmin(): Promise<ResponData<Role[]>> {
+    @Get('/getRolesByHotelIdNotAdmin/:hotel_id')
+    async getRolesByHotelIdNotAdmin(@Param('hotel_id') hotel_id: number): Promise<ResponData<Role[]>> {
         try {
-            return new ResponData<Role[]>(await this.roleService.getRolesNotAdmin(), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+            return new ResponData<Role[]>(await this.roleService.getRolesByHotelIdNotAdmin(hotel_id), HttpStatus.SUCCESS, HttpMessage.SUCCESS);
         } catch (error) {
             return new ResponData<Role[]>(null, HttpStatus.ERROR, HttpMessage.ERROR);
         }
