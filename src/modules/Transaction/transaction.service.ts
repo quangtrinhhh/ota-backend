@@ -13,6 +13,9 @@ import { CreateTransactionDto } from './dto/createTransaction.dto';
 import { UserEntity } from 'src/entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateTransactionDto } from './dto/updateTransaction .dto';
+import * as ExcelJS from 'exceljs';
+import { Response } from 'express';
+
 @Injectable()
 export class TransactionService {
   constructor(
@@ -567,6 +570,159 @@ export class TransactionService {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  /**
+   * chức năng xuất file excel
+   */
+
+  async exportTransactionDetails(
+    res: Response,
+    id: number,
+    type: string,
+  ): Promise<void> {
+    // Lấy dữ liệu từ TransactionService
+    const data = await this.getTransactionDetailsFilleExcel(id, type);
+    
+    // Tạo workbook và worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Chi Tiết Giao Dịch');
+
+    // Thêm tiêu đề cột (tiếng Việt)
+    worksheet.columns = [
+      { header: 'Ngày', key: 'Date', width: 20 },
+      { header: 'Mã Phiếu Thu', key: 'IncomeVoucherCode', width: 25 },
+      { header: 'Mã Phiếu Chi', key: 'ExpenseVoucherCode', width: 25 },
+      { header: 'Loại Giao Dịch', key: 'TransactionType', width: 15 },
+      { header: 'Số Tiền Thu', key: 'IncomeAmount', width: 25 },
+      { header: 'Số Tiền Chi', key: 'ExpenseAmount', width: 25 },
+      { header: 'Người Tạo', key: 'CreatedBy', width: 20 },
+      { header: 'Nội Dung', key: 'content', width: 50 },
+    ];
+
+    // Thêm dữ liệu vào worksheet
+    worksheet.addRows(data.transactions);
+
+    // Thêm hàng tổng cộng
+    worksheet.addRow([]); // Hàng trống
+    worksheet.addRow([]); // Hàng trống
+    worksheet.addRow(['Tổng Thu', '', '', '', data.totalIncome]);
+    worksheet.addRow(['Tổng Chi', '', '', '', '', data.totalExpense]);
+
+    // Định dạng số tiền thành VND
+    const moneyFormat = '#,##0" đ"'; // Định dạng tiền Việt Nam (VND)
+
+    // Áp dụng định dạng cho cột "Số Tiền Thu" và "Số Tiền Chi"
+    worksheet.getColumn('IncomeAmount').eachCell((cell) => {
+      cell.numFmt = moneyFormat; // Áp dụng định dạng VND
+    });
+
+    worksheet.getColumn('ExpenseAmount').eachCell((cell) => {
+      cell.numFmt = moneyFormat; // Áp dụng định dạng VND
+    });
+
+    // Áp dụng định dạng cho tổng tiền
+    const totalIncomeCell = worksheet.getCell(`E${worksheet.rowCount - 1}`);
+    const totalExpenseCell = worksheet.getCell(`E${worksheet.rowCount}`);
+
+    totalIncomeCell.numFmt = moneyFormat; // Áp dụng định dạng cho tổng thu
+    totalExpenseCell.numFmt = moneyFormat; // Áp dụng định dạng cho tổng chi
+
+    // Style cho header
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true };
+    headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: '00FF66' },
+      };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
+    });
+
+    // Căn chỉnh nội dung của các cột (ví dụ: căn giữa)
+    worksheet.eachRow((row) => {
+      row.eachCell((cell) => {
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      });
+    });
+
+    // Thiết lập response header để tải file, bao gồm ngày xuất file
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=Chi_Tiet_Giao_Dich_${type ? 'Tien_Mat': 'Chuyen_khoan'}.xlsx`,
+    );
+
+    // Xuất file Excel ra response
+    await workbook.xlsx.write(res);
+  }
+
+  async getTransactionDetailsFilleExcel(
+    id: number,
+    type: string,
+  ): Promise<any> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const hotelId = user.hotel_id;
+
+    // Chọn các relation tùy thuộc vào loại giao dịch
+    const relations = type === 'bank' ? ['user', 'bankTransaction'] : ['user'];
+
+    // Khởi tạo truy vấn
+    const query = this.transactionRepository
+      .createQueryBuilder('transaction')
+      .leftJoinAndSelect('transaction.user', 'user') // Thêm join để lấy thông tin người tạo
+      .leftJoinAndSelect('transaction.cashTransaction', 'cashTransaction')
+      .where('transaction.hotel_id = :hotelId', { hotelId })
+      .andWhere('transaction.paymentType = :paymentType', { paymentType: type })
+      .andWhere('transaction.status = :status', { status: 'active' })
+      .orderBy('transaction.created_at', 'DESC');
+
+    // Thực hiện truy vấn để lấy tất cả các giao dịch mà không phân trang
+    const transactions = await query.getMany();
+
+    const result = transactions.map((transaction) => {
+      const isIncome = transaction.transactionType === 'income';
+      return {
+        ID: transaction.id,
+        Date: transaction.created_at,
+        IncomeVoucherCode: isIncome ? transaction.code : null,
+        ExpenseVoucherCode: !isIncome ? transaction.code : null,
+        TransactionType: transaction.transactionType,
+        IncomeAmount: isIncome ? Number(transaction.amount) : null,
+        ExpenseAmount: !isIncome ? Number(transaction.amount) : null,
+        CreatedBy: transaction.user ? transaction.user.user_name : null, // Lấy tên người tạo giao dịch
+        content: transaction.content,
+      };
+    });
+
+    // Tính toán tổng số tiền thu và chi
+    const totalIncome = transactions
+      .filter((transaction) => transaction.transactionType === 'income')
+      .reduce((total, transaction) => total + Number(transaction.amount), 0);
+
+    const totalExpense = transactions
+      .filter((transaction) => transaction.transactionType === 'expense')
+      .reduce((total, transaction) => total + Number(transaction.amount), 0);
+
+    return {
+      totalIncome,
+      totalExpense,
+      transactions: result,
     };
   }
 }
