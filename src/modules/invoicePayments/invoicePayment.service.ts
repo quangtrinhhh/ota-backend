@@ -116,7 +116,7 @@ export class InvoicePaymentService {
 
         //Thêm bill
         const transactionDto: CreateTransactionDto = {
-            content: requestTransactionDto.note ? requestTransactionDto.note : `Thu tiền từ phòng số hóa đơn #${requestTransactionDto.invoice_id}`, // Nội dung giao dịch
+            content: requestTransactionDto.note ? requestTransactionDto.note : ` ${requestTransactionDto.paymentOption === PAYMENT_OPTIONS.PAYMENT ? 'Thu tiền' : 'Chi tiền'} từ phòng số hóa đơn #${requestTransactionDto.invoice_id}`, // Nội dung giao dịch
             note: requestTransactionDto.note,
             transactionType: requestTransactionDto.paymentMethod === PAYMENT_OPTIONS.PAYMENT ? 'income' : 'expense',
             amount: requestTransactionDto.price,
