@@ -75,8 +75,6 @@ export class InvoicePaymentService {
     }
 
     async handleTransaction(requestTransactionDto: RequestTransactionDto): Promise<any> {
-        console.log(requestTransactionDto);
-
         // thêm invoice payment
         const invoicePayment = new InvoicePayment();
         invoicePayment.amount = requestTransactionDto.price;
@@ -103,7 +101,7 @@ export class InvoicePaymentService {
             });
         } else {
             await this.expenseService.createExpense({
-                code: this.invoiceService.mapPaymentMethod(requestTransactionDto.paymentMethod) === PAYMENT_METHODS.CASH ? `PTTM-${shortUuid}` : `PTTG-${shortUuid}`,
+                code: this.invoiceService.mapPaymentMethod(requestTransactionDto.paymentMethod) === PAYMENT_METHODS.CASH ? `PCTM-${shortUuid}` : `PCTG-${shortUuid}`,
                 amount: requestTransactionDto.price,
                 payment_method: requestTransactionDto.paymentMethod === PAYMENT_METHODS.CASH ? 'Cash' : 'Bank_transfer',
                 note: requestTransactionDto.note,
@@ -116,10 +114,9 @@ export class InvoicePaymentService {
         }
         //
 
-
         //Thêm bill
         const transactionDto: CreateTransactionDto = {
-            content: `Thu tiền từ quầy bán hàng số hóa đơn #${requestTransactionDto.invoice_id}`, // Nội dung giao dịch
+            content: requestTransactionDto.note ? requestTransactionDto.note : `Thu tiền từ phòng số hóa đơn #${requestTransactionDto.invoice_id}`, // Nội dung giao dịch
             note: requestTransactionDto.note,
             transactionType: requestTransactionDto.paymentMethod === PAYMENT_OPTIONS.PAYMENT ? 'income' : 'expense',
             amount: requestTransactionDto.price,
@@ -134,7 +131,9 @@ export class InvoicePaymentService {
             requestTransactionDto.user_id,
             requestTransactionDto.hotel_id,
             transactionDto.transactionType,
-            this.invoiceService.mapPaymentMethod(requestTransactionDto.paymentMethod) === 'Cash' ? `PTTM-${shortUuid}` : `PTTG-${shortUuid}`,
+            this.invoiceService.mapPaymentMethod(requestTransactionDto.paymentMethod) === 'Cash' ? `
+            ${requestTransactionDto.paymentOption === PAYMENT_OPTIONS.PAYMENT ? 'PTTM' : 'PCTM'}-${shortUuid}` : `
+            ${requestTransactionDto.paymentOption === PAYMENT_OPTIONS.PAYMENT ? 'PTTG' : 'PCTG'}-${shortUuid}`,
         );
         //
 

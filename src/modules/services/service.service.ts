@@ -27,8 +27,6 @@ export class ServiceService {
     }
 
     async createService(createServiceDto: CreateServiceDto): Promise<Service> {
-        console.log("dã vao");
-
         const service = new Service();
         service.name = createServiceDto.name;
         service.description = createServiceDto.description;
