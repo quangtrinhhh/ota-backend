@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  Res,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -20,7 +21,7 @@ import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { TransactionService } from './transaction.service';
 import { UpdateTransactionDto } from './dto/updateTransaction .dto';
 import { TransactionEntity } from 'src/entities/transaction.entity';
-
+import { Response } from 'express'; // Import Response từ Express
 @Controller('transaction')
 export class TransactionController {
   constructor(private readonly TransactionService: TransactionService) {}
@@ -280,5 +281,39 @@ export class TransactionController {
       HttpStatus.SUCCESS,
       HttpMessage.SUCCESS,
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/file/transactionsexcel')
+  async exportTransactionDetails(
+    @Res() res: Response,
+    @Query('type') type: string,
+    @GetUser()
+    user: any,
+  ): Promise<void> {
+    try {
+      const userId = user._id;
+      const buffer = await this.TransactionService.exportTransactionDetails(
+        res,
+        userId,
+        type,
+      );
+
+      // Thiết lập các header trước khi gửi dữ liệu
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename=transactions_${type}_${new Date().toISOString()}.xlsx`,
+      );
+
+      // Gửi file Excel dưới dạng buffer
+      res.send(buffer); // Chỉ gọi res.send một lần
+    } catch (error) {
+      console.error('Error exporting transactions:', error);
+      res.status(500).send('Error exporting transactions');
+    }
   }
 }
