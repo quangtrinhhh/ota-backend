@@ -354,4 +354,102 @@ export class BookingService {
       throw new Error(error.message);
     }
   }
+
+  async getRoomTypes(
+    hotelId: number = 1, // Đặt giá trị mặc định cho hotelId là 1
+  ): Promise<any[]> {
+    try {
+      // Bước 1: Lấy tất cả các loại phòng với thông tin đầy đủ, bao gồm các loại giá
+      const roomTypes = await this.roomRepository
+        .createQueryBuilder('room')
+        .leftJoinAndSelect('room.room_type', 'room_type') // Join với bảng room_type để lấy thông tin loại phòng
+        .where('room.hotel_id = :hotelId', { hotelId })
+        .select([
+          'room_type.id AS room_type_id', // ID loại phòng
+          'room_type.name AS room_type_name', // Tên loại phòng
+          'room_type.notes AS room_type_notes', // Ghi chú loại phòng
+          'room_type.standardCapacity AS room_type_standard_capacity', // Sức chứa tiêu chuẩn
+          'room_type.maxCapacity AS room_type_max_capacity', // Sức chứa tối đa
+          'room_type.standardChildren AS room_type_standard_children', // Sức chứa trẻ em tiêu chuẩn
+          'room_type.maxChildren AS room_type_max_children', // Sức chứa tối đa cho trẻ em
+          'room_type.hourlyRate AS room_type_hourly_rate', // Giá theo giờ
+          'room_type.dailyRate AS room_type_daily_rate', // Giá theo ngày
+          'room_type.overnightRate AS room_type_overnight_rate', // Giá qua đêm
+        ])
+        .distinct(true) // Lọc trùng loại phòng
+        .getRawMany();
+  
+      // Bước 2: Lấy danh sách các phòng đã được đặt (booked)
+      const bookedRoomIds = await this.bookingRoomRepository
+        .createQueryBuilder('bookingRoom')
+        .leftJoinAndSelect('bookingRoom.booking', 'booking')
+        .where('booking.hotel_id = :hotelId', { hotelId })
+        .andWhere('booking.status IN (:...statuses)', {
+          statuses: ['Booked', 'CheckedIn'],
+        })
+        .select('bookingRoom.room_id')
+        .getRawMany();
+  
+      // Lấy danh sách ID phòng đã được đặt
+      const bookedRoomIdsList = bookedRoomIds.map(
+        (room) => room.bookingRoom_room_id,
+      );
+  
+      // Bước 3: Lọc các phòng chưa được đặt theo từng loại phòng và lấy thông tin
+      const availableRooms = [];
+  
+      for (const roomType of roomTypes) {
+        // Lấy tổng số phòng trong loại phòng
+        const totalRooms = await this.roomRepository
+          .createQueryBuilder('room')
+          .where('room.hotel_id = :hotelId', { hotelId })
+          .andWhere('room.room_type_id = :roomTypeId', {
+            roomTypeId: roomType.room_type_id,
+          })
+          .getCount(); // Sử dụng getCount() để đếm tổng số phòng
+  
+        // Lấy các phòng chưa được đặt
+        const queryBuilder = this.roomRepository
+          .createQueryBuilder('room')
+          .where('room.hotel_id = :hotelId', { hotelId })
+          .andWhere('room.room_type_id = :roomTypeId', {
+            roomTypeId: roomType.room_type_id,
+          })
+          .addSelect([
+            'room.id AS room_id', // ID phòng
+            'room.name AS room_name', // Tên phòng
+          ]);
+  
+        // Nếu danh sách phòng đã được đặt không rỗng, thêm điều kiện NOT IN
+        if (bookedRoomIdsList.length > 0) {
+          queryBuilder.andWhere('room.id NOT IN (:...bookedRoomIds)', {
+            bookedRoomIds: bookedRoomIdsList,
+          });
+        }
+  
+        const roomsForType = await queryBuilder.getRawMany();
+  
+        // Thêm thông tin vào kết quả
+        availableRooms.push({
+          id: roomType.room_type_id,
+          name: roomType.room_type_name,
+          standard_capacity: roomType.room_type_standard_capacity,
+          max_capacity: roomType.room_type_max_capacity,
+          standard_children: roomType.room_type_standard_children,
+          max_children: roomType.room_type_max_children,
+          hourly_rate: roomType.room_type_hourly_rate, // Giá theo giờ
+          daily_rate: roomType.room_type_daily_rate, // Giá theo ngày
+          overnight_rate: roomType.room_type_overnight_rate, // Giá qua đêm
+          total_rooms: totalRooms, // Tổng số phòng trong loại phòng này
+          available_rooms: roomsForType.length, // Số phòng chưa được đặt
+          rooms: roomsForType, // Thêm danh sách các phòng chưa được đặt vào kết quả
+        });
+      }
+  
+      return availableRooms;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+  
 }

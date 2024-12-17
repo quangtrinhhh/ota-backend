@@ -162,4 +162,19 @@ export class BookingController {
       );
     } 
   }
+  @Get('rooms/types')
+  async getRoomTypes() {
+    try {
+      const availableRooms = await this.bookingService.getRoomTypes();
+      console.log('Available Rooms:', availableRooms); // Kiểm tra dữ liệu từ service
+      if (!availableRooms || availableRooms.length === 0) {
+        throw new Error('No available rooms found');
+      }
+      return { data: availableRooms };
+    } catch (error) {
+      console.error('Error in getRoomTypes:', error.message); // Log lỗi chi tiết
+      return { message: error.message, statusCode: 500 };
+    }
+  }
+  
 }
