@@ -323,6 +323,8 @@ export class RoomService {
 
         const roomData = {
           id: room.id,
+          room_type_id: room.room_type_id,
+          overnightRate_price: room.room_type?.overnightRate,
           name: room.name,
           clean_status: room.clean_status,
           status: room.status, // Phòng đã đặt hoặc trống
