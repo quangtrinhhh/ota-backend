@@ -561,6 +561,7 @@ export class TransactionService {
       receiverAccount: transaction.bankTransaction?.receiverAccount || null, // Số tài khoản người nhận
       receiverName: transaction.bankTransaction?.receiverName || null, // Tên người nhận
       status: transaction.status,
+      transactionType: transaction.transactionType,
     }));
 
     // Trả về kết quả
@@ -584,7 +585,7 @@ export class TransactionService {
   ): Promise<void> {
     // Lấy dữ liệu từ TransactionService
     const data = await this.getTransactionDetailsFilleExcel(id, type);
-    
+
     // Tạo workbook và worksheet
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Chi Tiết Giao Dịch');
@@ -661,7 +662,7 @@ export class TransactionService {
     );
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename=Chi_Tiet_Giao_Dich_${type ? 'Tien_Mat': 'Chuyen_khoan'}.xlsx`,
+      `attachment; filename=Chi_Tiet_Giao_Dich_${type ? 'Tien_Mat' : 'Chuyen_khoan'}.xlsx`,
     );
 
     // Xuất file Excel ra response
