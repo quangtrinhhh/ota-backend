@@ -160,7 +160,7 @@ export class BookingController {
         HttpStatus.ERROR,
         error?.message || 'Đã xảy ra lỗi',
       );
-    } 
+    }
   }
   @Get('rooms/types')
   async getRoomTypes() {
@@ -176,5 +176,22 @@ export class BookingController {
       return { message: error.message, statusCode: 500 };
     }
   }
-  
+  @Get('/history/bookings')
+  async getBookingHistory(@Query('hotelId') hotelId: number) {
+    try {
+      const historyBookings =
+        await this.bookingService.getBookingHistory(hotelId);
+      return new ResponData(
+        historyBookings,
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
+    } catch (error) {
+      return new ResponData(
+        null,
+        HttpStatus.ERROR,
+        error?.message || 'Đã xảy ra lỗi',
+      );
+    }
+  }
 }
