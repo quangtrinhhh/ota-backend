@@ -212,7 +212,7 @@ export class BookingService {
     const booking = await this.getBookingById(id); // Kiểm tra xem booking có tồn tại không
     Object.assign(booking, updateBookingDto); // Cập nhật các trường mới
     await this.bookingRepository.save(booking); // Lưu thay đổi
-    return 'Update success';
+    return `Update success ${updateBookingDto.status}`;
   }
 
   // Xóa booking theo ID
@@ -378,7 +378,7 @@ export class BookingService {
         ])
         .distinct(true) // Lọc trùng loại phòng
         .getRawMany();
-  
+
       // Bước 2: Lấy danh sách các phòng đã được đặt (booked)
       const bookedRoomIds = await this.bookingRoomRepository
         .createQueryBuilder('bookingRoom')
@@ -389,15 +389,15 @@ export class BookingService {
         })
         .select('bookingRoom.room_id')
         .getRawMany();
-  
+
       // Lấy danh sách ID phòng đã được đặt
       const bookedRoomIdsList = bookedRoomIds.map(
         (room) => room.bookingRoom_room_id,
       );
-  
+
       // Bước 3: Lọc các phòng chưa được đặt theo từng loại phòng và lấy thông tin
       const availableRooms = [];
-  
+
       for (const roomType of roomTypes) {
         // Lấy tổng số phòng trong loại phòng
         const totalRooms = await this.roomRepository
@@ -407,7 +407,7 @@ export class BookingService {
             roomTypeId: roomType.room_type_id,
           })
           .getCount(); // Sử dụng getCount() để đếm tổng số phòng
-  
+
         // Lấy các phòng chưa được đặt
         const queryBuilder = this.roomRepository
           .createQueryBuilder('room')
@@ -419,16 +419,16 @@ export class BookingService {
             'room.id AS room_id', // ID phòng
             'room.name AS room_name', // Tên phòng
           ]);
-  
+
         // Nếu danh sách phòng đã được đặt không rỗng, thêm điều kiện NOT IN
         if (bookedRoomIdsList.length > 0) {
           queryBuilder.andWhere('room.id NOT IN (:...bookedRoomIds)', {
             bookedRoomIds: bookedRoomIdsList,
           });
         }
-  
+
         const roomsForType = await queryBuilder.getRawMany();
-  
+
         // Thêm thông tin vào kết quả
         availableRooms.push({
           id: roomType.room_type_id,
@@ -445,11 +445,92 @@ export class BookingService {
           rooms: roomsForType, // Thêm danh sách các phòng chưa được đặt vào kết quả
         });
       }
-  
+
       return availableRooms;
     } catch (error) {
       throw new Error(error.message);
     }
   }
-  
+
+  async getBookingHistory(hotelId: number): Promise<any[]> {
+    const rawData = await this.bookingRepository
+      .createQueryBuilder('booking')
+      .leftJoinAndSelect('booking.customer', 'customer')
+      .leftJoinAndSelect('booking.booking_rooms', 'booking_room')
+      .leftJoinAndSelect('booking_room.room', 'room')
+      .leftJoinAndSelect('room.room_type', 'room_type')
+      .leftJoinAndSelect('booking.invoices', 'invoice')
+      .leftJoinAndSelect('invoice.invoice_payments', 'invoice_payment') // Lấy các khoản thanh toán từ hóa đơn
+      .where('booking.hotel_id = :hotelId', { hotelId })
+      .select([
+        'booking.id AS booking_id',
+        'booking.status AS booking_status',
+        'booking.booking_at AS booking_time',
+        'booking.check_out_at AS check_out_at', // Thêm check_out_at
+        'customer.name AS customer_name',
+        'room.name AS room_name',
+        'room_type.code AS room_type_code',
+        'room_type.name AS room_type_name',
+        'booking_room.price AS room_price',
+        'booking.total_amount AS booking_total_amount',
+        'invoice_payment.amount AS paid_amount', // Tiền khách đã trả
+        'invoice.total_amount AS total_amount',
+      ])
+      .groupBy(
+        'booking.id, customer.name, room.name, room_type.code, room_type.name, booking_room.price, invoice.total_amount, invoice_payment.amount, booking.check_out_at',
+      )
+      .orderBy('booking.booking_at', 'DESC') // Sắp xếp theo ngày đặt từ cao đến thấp
+      .getRawMany();
+    const groupedData = rawData.reduce((acc, item) => {
+      const {
+        booking_id,
+        booking_status,
+        booking_time,
+        check_out_at,
+        customer_name,
+        room_name,
+        room_type_code,
+        room_type_name,
+        room_price,
+        paid_amount,
+        total_amount,
+      } = item;
+
+      // Tính số đêm giữa thời gian đặt và check-out
+      const checkInDate = new Date(booking_time);
+      const checkOutDate = new Date(check_out_at);
+      const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
+      const nightCount = Math.ceil(diffTime / (1000 * 3600 * 24)); // Chuyển đổi ra số đêm
+
+      // Tính tổng tiền của phòng: room_price * nightCount
+      const roomTotalAmount = room_price * nightCount;
+
+      if (!acc[booking_id]) {
+        acc[booking_id] = {
+          booking_id,
+          booking_status,
+          booking_time,
+          check_out_at,
+          customer_name,
+          total_amount,
+          paid_amount: paid_amount || 0,
+          total_amount_to_pay: total_amount - paid_amount,
+          rooms: [],
+        };
+      }
+
+      acc[booking_id].rooms.push({
+        room_name,
+        room_type_code,
+        room_type_name,
+        room_price,
+        room_total_amount: roomTotalAmount, // Thêm tổng tiền của phòng vào kết quả
+        room_night_count: nightCount, // Thêm số ngày vào phòng
+      });
+
+      return acc;
+    }, {});
+
+    return Object.values(groupedData);
+  }
 }
