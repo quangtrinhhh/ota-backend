@@ -252,7 +252,7 @@ export class BookingService {
         //
       }
 
-      return newBooking.id;
+      return invoice.id;
     } catch (error) {
       console.error('Error creating booking:', error);
       throw new Error(`Error creating booking: ${error.message}`);
