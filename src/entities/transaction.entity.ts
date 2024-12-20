@@ -41,7 +41,7 @@ export class TransactionEntity extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
-  @Column()
+  @Column({ nullable: true })
   user_id: number;
 
   @Column({ type: 'boolean', default: false })

@@ -7,9 +7,10 @@ import { BookingRoomEntity } from 'src/entities/bookingRoom.entity';
 import { RoomEntity } from 'src/entities/room.entity';
 import { CustomerEntity } from 'src/entities/customer.entity';
 import { HotelEntity } from 'src/entities/hotel.entity';
-import { InvoiceService } from '../invoice/invoice.service';
 import { InvoiceModule } from '../invoice/invoice.module';
 import { InvoicePaymentModule } from '../invoicePayments/invoicePayment.module';
+import { ReceiptModule } from '../receips/receip.module';
+import { TransactionModule } from '../Transaction/transaction.module';
 
 @Module({
   imports: [
@@ -22,8 +23,10 @@ import { InvoicePaymentModule } from '../invoicePayments/invoicePayment.module';
     ]),
     InvoiceModule,
     InvoicePaymentModule,
+    ReceiptModule,
+    TransactionModule,
   ],
   controllers: [BookingController],
   providers: [BookingService],
 })
-export class BookingModule {}
+export class BookingModule { }

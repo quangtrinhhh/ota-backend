@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual, Not, In } from 'typeorm';
+import { Repository, MoreThanOrEqual, Not } from 'typeorm';
 import { BookingEntity } from 'src/entities/booking.entity';
 import { CreateBookingDto } from './dto/createBooking.dto';
 import { UpdateBookingDto } from './dto/updateBooking.dto';
@@ -10,9 +10,14 @@ import { CustomerEntity } from 'src/entities/customer.entity';
 import { HotelEntity } from 'src/entities/hotel.entity';
 import { InvoiceService } from '../invoice/invoice.service';
 import { CreateInvoiceDto } from '../invoice/dto/createInvoice.dto';
-import { InvoicePayment } from 'src/models/invoicePayment.model';
 import { InvoicePaymentService } from '../invoicePayments/invoicePayment.service';
 import { CreateInvoicePaymentDto } from '../invoicePayments/dto/createInvoicePayment.dto';
+import { ReceiptService } from '../receips/receip.service';
+
+import { v4 as uuidv4 } from 'uuid';
+import { CreateTransactionDto, PaymentType } from '../Transaction/dto/createTransaction.dto';
+import { TransactionService } from '../Transaction/transaction.service';
+
 
 @Injectable()
 export class BookingService {
@@ -29,8 +34,10 @@ export class BookingService {
     private readonly hotelRepository: Repository<HotelEntity>,
 
     private readonly invoiceService: InvoiceService,
+    private readonly transactionService: TransactionService,
+    private readonly receiptService: ReceiptService,
     private readonly InvoicePaymentService: InvoicePaymentService,
-  ) {}
+  ) { }
 
   // Lấy tất cả các booking
   async getBookings() {
@@ -173,7 +180,7 @@ export class BookingService {
       });
       await this.bookingRoomRepository.save(bookingRooms);
       const invoiceDto: CreateInvoiceDto = {
-        total_amount: total_amount,
+        total_amount: total_amount + paidAmount,
         discount_amount: 0,
         discount_percentage: 0,
         note_discount: '',
@@ -198,6 +205,40 @@ export class BookingService {
         await this.InvoicePaymentService.createInvoicePayment(
           invoicePaymentDto,
         );
+
+        //thêm phiếu thu
+        let shortUuid = uuidv4().split('-')[0].slice(0, 5);
+        await this.receiptService.createReceipt({
+          code: this.invoiceService.mapPaymentMethod(paymentMethod) === 'Cash' ? `PTTM-${shortUuid}` : `PTTG-${shortUuid}`,
+          amount: paidAmount,
+          payment_method: paymentMethod,
+          note: `Thanh toán trước ${paidAmount}`,
+          customer_name: '',
+          user_id: null,
+          hotel_id: hotel_id,
+          category: 'Room_Payment',
+          invoice_id: invoice.id,
+        });
+
+        //Thêm bill
+        const transactionDto: CreateTransactionDto = {
+          content: `Thanh toán trước ${paidAmount}`,
+          note: '',
+          transactionType: 'income',
+          amount: paidAmount,
+          user_id: null,
+          paymentType: paymentMethod === 'Cash' ? PaymentType.CASH : PaymentType.BANK,
+          created_at: new Date(),
+        };
+
+        await this.transactionService.createTransactionWithHotelId(
+          transactionDto,
+          null,
+          hotel_id,
+          transactionDto.transactionType,
+          this.invoiceService.mapPaymentMethod(paymentMethod) === 'Cash' ? `PTTM-${shortUuid}` : `PTTG-${shortUuid}`,
+        );
+        //
       }
 
       return { newBooking, bookingRooms, customer };

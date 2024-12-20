@@ -351,7 +351,7 @@ export class InvoiceService {
         name: room.name,
         clean_status: room.clean_status,
         status: room.status,
-        price: room.price,
+        price: bookingRoom.price,
         room_type: room.room_type?.name || null, // Nếu không có room_type, trả về null
         floor: room.floor?.name || null,         // Nếu không có floor, trả về null
         hotel: room.hotel

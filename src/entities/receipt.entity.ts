@@ -38,7 +38,7 @@ export class ReceiptEntity extends BaseEntity {
     @JoinColumn({ name: 'user_id' })
     user: UserEntity;
 
-    @Column()
+    @Column({ nullable: true })
     user_id: number;
 
     @ManyToOne(() => HotelEntity, hotel => hotel.id)
