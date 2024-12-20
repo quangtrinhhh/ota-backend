@@ -15,9 +15,11 @@ import { CreateInvoicePaymentDto } from '../invoicePayments/dto/createInvoicePay
 import { ReceiptService } from '../receips/receip.service';
 
 import { v4 as uuidv4 } from 'uuid';
-import { CreateTransactionDto, PaymentType } from '../Transaction/dto/createTransaction.dto';
+import {
+  CreateTransactionDto,
+  PaymentType,
+} from '../Transaction/dto/createTransaction.dto';
 import { TransactionService } from '../Transaction/transaction.service';
-
 
 @Injectable()
 export class BookingService {
@@ -37,7 +39,7 @@ export class BookingService {
     private readonly transactionService: TransactionService,
     private readonly receiptService: ReceiptService,
     private readonly InvoicePaymentService: InvoicePaymentService,
-  ) { }
+  ) {}
 
   // Lấy tất cả các booking
   async getBookings() {
@@ -58,7 +60,7 @@ export class BookingService {
   }
 
   // Tạo mới booking
-  async createBooking(dto: CreateBookingDto): Promise<any> {
+  async createBooking(dto: CreateBookingDto, user_id: number): Promise<any> {
     try {
       const {
         customer_name,
@@ -165,10 +167,13 @@ export class BookingService {
         booking_at: check_in_at,
         check_out_at,
         status: 'Booked', // Mặc định là Booked
+        user_id,
       });
       const newBooking = await this.bookingRepository.save(booking);
 
       // 4. Tạo booking_rooms
+      console.log(booking_rooms);
+
       const bookingRooms = booking_rooms.map((room) => {
         return this.bookingRoomRepository.create({
           booking_id: newBooking.id,
@@ -209,7 +214,10 @@ export class BookingService {
         //thêm phiếu thu
         let shortUuid = uuidv4().split('-')[0].slice(0, 5);
         await this.receiptService.createReceipt({
-          code: this.invoiceService.mapPaymentMethod(paymentMethod) === 'Cash' ? `PTTM-${shortUuid}` : `PTTG-${shortUuid}`,
+          code:
+            this.invoiceService.mapPaymentMethod(paymentMethod) === 'Cash'
+              ? `PTTM-${shortUuid}`
+              : `PTTG-${shortUuid}`,
           amount: paidAmount,
           payment_method: paymentMethod,
           note: `Thanh toán trước ${paidAmount}`,
@@ -227,7 +235,8 @@ export class BookingService {
           transactionType: 'income',
           amount: paidAmount,
           user_id: null,
-          paymentType: paymentMethod === 'Cash' ? PaymentType.CASH : PaymentType.BANK,
+          paymentType:
+            paymentMethod === 'Cash' ? PaymentType.CASH : PaymentType.BANK,
           created_at: new Date(),
         };
 
@@ -236,12 +245,14 @@ export class BookingService {
           null,
           hotel_id,
           transactionDto.transactionType,
-          this.invoiceService.mapPaymentMethod(paymentMethod) === 'Cash' ? `PTTM-${shortUuid}` : `PTTG-${shortUuid}`,
+          this.invoiceService.mapPaymentMethod(paymentMethod) === 'Cash'
+            ? `PTTM-${shortUuid}`
+            : `PTTG-${shortUuid}`,
         );
         //
       }
 
-      return { newBooking, bookingRooms, customer };
+      return newBooking.id;
     } catch (error) {
       console.error('Error creating booking:', error);
       throw new Error(`Error creating booking: ${error.message}`);

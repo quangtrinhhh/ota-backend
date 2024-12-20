@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { BookingService } from './booking.service';
@@ -18,6 +19,8 @@ import { ResponData } from 'src/global/globalClass';
 import { HttpMessage, HttpStatus } from 'src/global/globalEnum';
 import { Booking } from 'src/models/booking.model';
 import { RoomEntity } from 'src/entities/room.entity';
+import { JwtAuthGuard } from 'src/auth/passport/jwt-auth.guard';
+import { GetUser } from 'src/decorator/user.decorator';
 
 @Controller('bookings')
 export class BookingController {
@@ -58,14 +61,19 @@ export class BookingController {
   }
 
   // Tạo mới booking
+  @UseGuards(JwtAuthGuard)
   @Post()
   async createBooking(
+    @GetUser()
+    user: any,
     @Body() createBookingDto: CreateBookingDto,
   ): Promise<any> {
     try {
       // Tạo đặt phòng bằng DTO
-      const newBookings =
-        await this.bookingService.createBooking(createBookingDto);
+      const newBookings = await this.bookingService.createBooking(
+        createBookingDto,
+        user._id,
+      );
       return new ResponData(
         newBookings,
         HttpStatus.SUCCESS,
