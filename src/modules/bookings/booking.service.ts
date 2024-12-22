@@ -39,7 +39,7 @@ export class BookingService {
     private readonly transactionService: TransactionService,
     private readonly receiptService: ReceiptService,
     private readonly InvoicePaymentService: InvoicePaymentService,
-  ) {}
+  ) { }
 
   // Lấy tất cả các booking
   async getBookings() {
@@ -222,7 +222,7 @@ export class BookingService {
           payment_method: paymentMethod,
           note: `Thanh toán trước ${paidAmount}`,
           customer_name: '',
-          user_id: null,
+          user_id: user_id,
           hotel_id: hotel_id,
           category: 'Room_Payment',
           invoice_id: invoice.id,
@@ -234,7 +234,7 @@ export class BookingService {
           note: '',
           transactionType: 'income',
           amount: paidAmount,
-          user_id: null,
+          user_id: user_id,
           paymentType:
             paymentMethod === 'Cash' ? PaymentType.CASH : PaymentType.BANK,
           created_at: new Date(),
@@ -242,7 +242,7 @@ export class BookingService {
 
         await this.transactionService.createTransactionWithHotelId(
           transactionDto,
-          null,
+          user_id,
           hotel_id,
           transactionDto.transactionType,
           this.invoiceService.mapPaymentMethod(paymentMethod) === 'Cash'
